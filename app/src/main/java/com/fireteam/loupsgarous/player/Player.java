@@ -32,6 +32,14 @@ public class Player {
         return loverId;
     }
 
+    public PlayerType getType() {
+        return type;
+    }
+
+    public void setType(PlayerType type) {
+        this.type = type;
+    }
+
     public boolean kill()
     {
         alive = false;
