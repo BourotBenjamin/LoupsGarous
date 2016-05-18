@@ -22,9 +22,9 @@ public class GameState {
     private int currentPlayers;
     PlayerType[] middleCards;
 
-    public void init(int nbP)
+    public void init(int nbPlayers)
     {
-        nbPlayers = nbP;
+        this.nbPlayers = nbPlayers;
         currentPlayers = 0;
         votes = new int[nbPlayers];
         players = new Player[nbPlayers];
@@ -150,11 +150,14 @@ public class GameState {
     }
 
 
-    public KillState killPlayer(Player playerToKill)
+    public KillState killPlayer(int playerIdToKill)
     {
         KillState killState;
-        if(playerToKill == null)
+        Player playerToKill;
+        if(playerIdToKill == -1)
             playerToKill = getPlayerToKill();
+        else
+            playerToKill = players[playerIdToKill];
         if(playerToKill != null) {
             playerToKill.kill();
             if (playerToKill.getLoverId() != -1) {
@@ -186,20 +189,24 @@ public class GameState {
         votes[playerId] += 1;
     }
 
-    public void setLeader()
-    {
+    public int getPlayerIdToSetLeader() {
         int best = -1, bestScore = -1;
-        for(int i = 0; i < nbPlayers; i++)
-        {
-            if(votes[i] > bestScore)
-            {
+        for (int i = 0; i < nbPlayers; i++) {
+            if (votes[i] > bestScore) {
                 best = i;
                 bestScore = votes[i];
             }
             votes[i] = 0;
         }
-        players[best].setLeader();
-        leader = best;
+        return best;
+    }
+
+    public void setLeader(int playerIdToSetLeader)
+    {
+        if(playerIdToSetLeader == - 1)
+            playerIdToSetLeader = getPlayerIdToSetLeader();
+        players[playerIdToSetLeader].setLeader();
+        leader = playerIdToSetLeader;
     }
 
     public PlayerType getPlayerType(int playerId)
@@ -220,4 +227,7 @@ public class GameState {
         }
     }
 
+    public Player[] getPlayers() {
+        return players;
+    }
 }
