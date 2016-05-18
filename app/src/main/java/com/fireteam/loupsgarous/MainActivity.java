@@ -8,12 +8,20 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.view.MotionEvent;
 import android.view.View;
+import android.widget.Toast;
 
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
-import com.google.android.gms.drive.Drive;
+import com.google.android.gms.common.api.ResultCallback;
+import com.google.android.gms.common.api.Status;
 import com.google.android.gms.games.Games;
+import com.google.android.gms.games.multiplayer.Multiplayer;
+import com.google.android.gms.games.multiplayer.turnbased.TurnBasedMatch;
+import com.google.android.gms.games.multiplayer.turnbased.TurnBasedMatchConfig;
+import com.google.android.gms.games.multiplayer.turnbased.TurnBasedMultiplayer;
 import com.google.example.games.basegameutils.BaseGameUtils;
+
+import java.util.ArrayList;
 
 /**
  * An example full-screen activity that shows and hides the system UI (i.e.
@@ -39,6 +47,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
     private static final int UI_ANIMATION_DELAY = 300;
     private final Handler mHideHandler = new Handler();
     private View mContentView;
+    private GameState state;
     private final Runnable mHidePart2Runnable = new Runnable() {
         @SuppressLint("InlinedApi")
         @Override
@@ -101,7 +110,6 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
                 .addConnectionCallbacks(this)
                 .addOnConnectionFailedListener(this)
                 .addApi(Games.API).addScope(Games.SCOPE_GAMES)
-                .addApi(Drive.API).addScope(Drive.SCOPE_APPFOLDER) // Drive API
                 // add other APIs and scopes here as needed
                 .build();
 
@@ -120,6 +128,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
             }
         });
 
+        state = new GameState();
         // Upon interacting with UI controls, delay any scheduled hide()
         // operations to prevent the jarring behavior of controls going away
         // while interacting with the UI.
@@ -194,8 +203,8 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
 
     @Override
     public void onConnected(Bundle connectionHint) {
-        // The player is signed in. Hide the sign-in button and allow the
-        // player to proceed.
+        Intent intent = Games.TurnBasedMultiplayer.getSelectOpponentsIntent(mGoogleApiClient, 1, 7, true);
+        startActivityForResult(intent, RC_SELECT_PLAYERS);
     }
 
     private boolean mResolvingConnectionFailure = false;
@@ -249,6 +258,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
     }
 
     private static final int RC_SIGN_IN = 9001;
+    private static final int RC_SELECT_PLAYERS = 9002;
 
     @Override
     protected void onActivityResult(int request, int result, Intent data) {
@@ -267,6 +277,100 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
                             request, result, R.string.signin_failure);
                 }
                 break;
+            case RC_SELECT_PLAYERS:
+                if (result != RESULT_OK) {
+                    return;
+                }
+                final ArrayList<String> invitees = data.getStringArrayListExtra(Games.EXTRA_PLAYER_IDS);
+
+                // Get auto-match criteria.
+                Bundle autoMatchCriteria = null;
+                autoMatchCriteria = TurnBasedMatchConfig.createAutoMatchCriteria(2, 2, 0);
+
+                TurnBasedMatchConfig tbmc = TurnBasedMatchConfig.builder().addInvitedPlayers(invitees).setAutoMatchCriteria(autoMatchCriteria).build();
+
+                Games.TurnBasedMultiplayer.createMatch(mGoogleApiClient, tbmc).setResultCallback(
+                        new ResultCallback<TurnBasedMultiplayer.InitiateMatchResult>() {
+                            @Override
+                            public void onResult(TurnBasedMultiplayer.InitiateMatchResult result) {
+                                processResult(result);
+                            }
+                        });
+                break;
+        }
+    }
+
+
+    public void initGame(TurnBasedMatch match)
+    {
+        state.update();
+        Games.TurnBasedMultiplayer.takeTurn(mGoogleApiClient, match.getMatchId(), state.getData(), null).setResultCallback(
+                new ResultCallback<TurnBasedMultiplayer.UpdateMatchResult>() {
+                    @Override
+                    public void onResult(TurnBasedMultiplayer.UpdateMatchResult result) {
+                        processResult(result);
+                    }
+                });;
+    }
+
+    public void playGame(TurnBasedMatch match)
+    {
+        Games.TurnBasedMultiplayer.takeTurn(mGoogleApiClient, match.getMatchId(), state.getData(), null).setResultCallback(
+                new ResultCallback<TurnBasedMultiplayer.UpdateMatchResult>() {
+                    @Override
+                    public void onResult(TurnBasedMultiplayer.UpdateMatchResult result) {
+                        processResult(result);
+                    }
+                });
+    }
+
+
+    public void processResult(TurnBasedMultiplayer.InitiateMatchResult result) {
+        // Check if the status code is not success.
+        Status status = result.getStatus();
+        if (!status.isSuccess()) {
+            //showError(status.getStatusCode());
+            return;
+        }
+
+        TurnBasedMatch match = result.getMatch();
+
+        // If this player is not the first player in this match, continue.
+        if (match.getData() != null) {
+            Toast.makeText(this, "Player2 " + match.getData().toString(), Toast.LENGTH_LONG).show();
+            playGame(match);
+            return;
+        }
+        Toast.makeText(this, "Player1 ", Toast.LENGTH_LONG).show();
+
+        initGame(match);
+        playGame(match);
+    }
+
+
+
+    public void processResult(TurnBasedMultiplayer.UpdateMatchResult result) {
+        Status status = result.getStatus();
+        if (!status.isSuccess()) {
+            //showError(status.getStatusCode());
+            return;
+        }
+        TurnBasedMatch match = result.getMatch();
+        /*
+        if (match.canRematch()) {
+            askForRematch();
+        }*/
+
+        boolean isDoingTurn = (match.getTurnStatus() == TurnBasedMatch.MATCH_TURN_STATUS_MY_TURN);
+        Toast.makeText(this, "Played ", Toast.LENGTH_LONG).show();
+
+        if (match.getData() != null) {
+            Toast.makeText(this, "Data: " + match.getData().toString(), Toast.LENGTH_LONG).show();
+        }
+
+        if (isDoingTurn) {
+            playGame(match);
+            return;
         }
     }
 
