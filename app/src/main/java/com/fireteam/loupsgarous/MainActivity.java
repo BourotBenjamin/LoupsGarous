@@ -21,6 +21,8 @@ import com.google.android.gms.games.multiplayer.turnbased.TurnBasedMatchConfig;
 import com.google.android.gms.games.multiplayer.turnbased.TurnBasedMultiplayer;
 import com.google.example.games.basegameutils.BaseGameUtils;
 
+import org.json.JSONException;
+
 import java.util.ArrayList;
 
 /**
@@ -132,7 +134,10 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
         // Upon interacting with UI controls, delay any scheduled hide()
         // operations to prevent the jarring behavior of controls going away
         // while interacting with the UI.
-        findViewById(R.id.dummy_button).setOnTouchListener(mDelayHideTouchListener);
+        findViewById(R.id.play_button).setOnTouchListener(mDelayHideTouchListener);
+
+
+
     }
 
     @Override
@@ -205,6 +210,8 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
     public void onConnected(Bundle connectionHint) {
         Intent intent = Games.TurnBasedMultiplayer.getSelectOpponentsIntent(mGoogleApiClient, 1, 7, true);
         startActivityForResult(intent, RC_SELECT_PLAYERS);
+
+
     }
 
     private boolean mResolvingConnectionFailure = false;
@@ -303,25 +310,53 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
 
     public void initGame(TurnBasedMatch match)
     {
-        state.update();
-        Games.TurnBasedMultiplayer.takeTurn(mGoogleApiClient, match.getMatchId(), state.getData(), null).setResultCallback(
-                new ResultCallback<TurnBasedMultiplayer.UpdateMatchResult>() {
-                    @Override
-                    public void onResult(TurnBasedMultiplayer.UpdateMatchResult result) {
-                        processResult(result);
-                    }
-                });;
+        try {
+            state.unserialize(match.getData());
+        }
+        catch(JSONException e){
+
+        }
+
+        try{
+            byte [] serializedData = state.serialize();
+            Games.TurnBasedMultiplayer.takeTurn(mGoogleApiClient, match.getMatchId(), serializedData, null).setResultCallback(
+                    new ResultCallback<TurnBasedMultiplayer.UpdateMatchResult>() {
+                        @Override
+                        public void onResult(TurnBasedMultiplayer.UpdateMatchResult result) {
+                            processResult(result);
+                        }
+                    });
+        }
+        catch(JSONException e)
+        {
+
+        }
+
     }
 
     public void playGame(TurnBasedMatch match)
     {
-        Games.TurnBasedMultiplayer.takeTurn(mGoogleApiClient, match.getMatchId(), state.getData(), null).setResultCallback(
-                new ResultCallback<TurnBasedMultiplayer.UpdateMatchResult>() {
-                    @Override
-                    public void onResult(TurnBasedMultiplayer.UpdateMatchResult result) {
-                        processResult(result);
-                    }
-                });
+        try {
+            state.unserialize(match.getData());
+        }
+        catch(JSONException e){
+
+        }
+
+        try {
+            byte[] serializedData = state.serialize();
+            Games.TurnBasedMultiplayer.takeTurn(mGoogleApiClient, match.getMatchId(), serializedData, null).setResultCallback(
+                    new ResultCallback<TurnBasedMultiplayer.UpdateMatchResult>() {
+                        @Override
+                        public void onResult(TurnBasedMultiplayer.UpdateMatchResult result) {
+                            processResult(result);
+                        }
+                    });
+        }
+        catch(JSONException e)
+        {
+
+        }
     }
 
 

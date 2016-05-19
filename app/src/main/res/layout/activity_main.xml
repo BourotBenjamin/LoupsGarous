@@ -2,7 +2,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#0099cc"
+    android:background="#FFFFFF"
     tools:context="com.fireteam.loupsgarous.MainActivity">
 
     <!-- The primary full-screen view. This can be replaced with whatever view
@@ -14,7 +14,7 @@
         android:layout_height="match_parent"
         android:gravity="center"
         android:keepScreenOn="true"
-        android:text="@string/dummy_content"
+        android:text="@string/game_name"
         android:textColor="#33b5e5"
         android:textSize="50sp"
         android:textStyle="bold" />
@@ -37,12 +37,11 @@
             tools:ignore="UselessParent">
 
             <Button
-                android:id="@+id/dummy_button"
-                style="?metaButtonBarButtonStyle"
+                android:id="@+id/play_button"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
-                android:text="@string/dummy_button" />
+                android:text="@string/play_button" />
 
         </LinearLayout>
     </FrameLayout>
