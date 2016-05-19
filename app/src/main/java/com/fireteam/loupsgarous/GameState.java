@@ -105,8 +105,7 @@ public class GameState {
 
             }
         }
-        else
-            return null;
+        return null;
     }
 
 
@@ -256,15 +255,31 @@ public class GameState {
             playerToKill.kill();
             if (playerToKill.getLoverId() != -1) {
                 players[playerToKill.getLoverId()].kill();
-                if(playerToKill.getType() == PlayerType.HUNTER)
-                    killState = KillState.KILLED_HUNTER;
-                else
-                    killState = KillState.KILLED_HUNTER_AND_LOVER;
+                if(playerToKill.getType() == PlayerType.HUNTER) {
+                    if (players[playerToKill.getLoverId()].isLeader() || playerToKill.isLeader())
+                        killState = KillState.KILLED_HUNTER_LEADER_AND_LOVER;
+                    else
+                        killState = KillState.KILLED_HUNTER_AND_LOVER;
+                }
+                else {
+                    if (players[playerToKill.getLoverId()].isLeader() || playerToKill.isLeader())
+                        killState = KillState.KILLED_WITH_LOVER_AND_LEADER;
+                    else
+                        killState = KillState.KILLED_WITH_LOVER;
+                }
             }
-            else if(playerToKill.getType() == PlayerType.HUNTER)
-                killState = KillState.KILLED_WITH_LOVER;
-            else
-                killState = KillState.KILLED;
+            else if(playerToKill.getType() == PlayerType.HUNTER){
+                if (playerToKill.isLeader())
+                    killState = KillState.KILLED_HUNTER_AND_LEADER;
+                else
+                    killState = KillState.KILLED_HUNTER;
+            }
+            else{
+                if (playerToKill.isLeader())
+                    killState = KillState.KILLED_LEADER;
+                else
+                    killState = KillState.KILLED;
+            }
 
         }
         else
