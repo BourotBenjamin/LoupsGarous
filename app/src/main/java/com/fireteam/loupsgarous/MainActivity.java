@@ -360,7 +360,6 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
         if (match.canRematch()) {
             askForRematch();
         }*/
-
         boolean isDoingTurn = (match.getTurnStatus() == TurnBasedMatch.MATCH_TURN_STATUS_MY_TURN);
         Toast.makeText(this, "Played ", Toast.LENGTH_LONG).show();
 

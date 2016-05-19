@@ -21,6 +21,94 @@ public class GameState {
     private int nbPlayers;
     private int currentPlayers;
     PlayerType[] middleCards;
+    TurnType type;
+    private int lastPlayedIdPlayer;
+
+    public String getLeaderParticipantId()
+    {
+        for (int i = 0; i < nbPlayers; i++)
+            if(players[i].isLeader())
+                return players[i].getParticipantId();
+        return null;
+    }
+
+    public String getHunterParticipantId()
+    {
+        for (int i = 0; i < nbPlayers; i++)
+            if(players[i].getType() == PlayerType.HUNTER)
+                return players[i].getParticipantId();
+        return null;
+    }
+
+    public TurnType getTurnType()
+    {
+        return type;
+    }
+
+    public String getNextPlayerTurn()
+    {
+        if(currentPlayers == nbPlayers)
+        {
+            switch (type)
+            {
+                case INIT_GAME_THIEF:
+                    lastPlayedIdPlayer = -1;
+                    type = TurnType.INIT_GAME_CUPIDON;
+                    for (int i = 0; i < nbPlayers; i++)
+                        if(players[i].getType() == PlayerType.THIEF)
+                            return players[i].getParticipantId();
+                    break;
+                case INIT_GAME_CUPIDON:
+                    lastPlayedIdPlayer = -1;
+                    type = TurnType.VOTE_FOR_LEADER;
+                    for (int i = 0; i < nbPlayers; i++)
+                        if(players[i].getType() == PlayerType.CUPIDON)
+                            return players[i].getParticipantId();
+                    break;
+                case VOTE_FOR_LEADER:
+                    ++lastPlayedIdPlayer;
+                    if(lastPlayedIdPlayer < nbPlayers)
+                        return players[lastPlayedIdPlayer].getParticipantId();
+                    else
+                        type = TurnType.SEER_TURN;
+                    break;
+                case SEER_TURN:
+                    lastPlayedIdPlayer = -1;
+                    type = TurnType.NIGHT;
+                    for (int i = 0; i < nbPlayers; i++)
+                        if(players[i].isAlive() && players[i].getType() == PlayerType.SEER)
+                            return players[i].getParticipantId();
+                    break;
+                case NIGHT:
+                    while(lastPlayedIdPlayer < nbPlayers) {
+                        ++lastPlayedIdPlayer;
+                        if (players[lastPlayedIdPlayer].isAlive() && players[lastPlayedIdPlayer].getType() == PlayerType.WEREWOLF)
+                            return players[lastPlayedIdPlayer].getParticipantId();
+                    }
+                    type = TurnType.WITCH_TURN;
+                    break;
+                case WITCH_TURN:
+                    lastPlayedIdPlayer = -1;
+                    type = TurnType.DAY;
+                    for (int i = 0; i < nbPlayers; i++)
+                        if(players[i].isAlive() && players[i].getType() == PlayerType.WITCH)
+                            return players[i].getParticipantId();
+                    break;
+                case DAY:
+                    while(lastPlayedIdPlayer < nbPlayers) {
+                        ++lastPlayedIdPlayer;
+                        if (players[lastPlayedIdPlayer].isAlive())
+                            return players[lastPlayedIdPlayer].getParticipantId();
+                    }
+                    type = TurnType.SEER_TURN;
+                    break;
+
+            }
+        }
+        else
+            return null;
+    }
+
 
     public void init(int nbPlayers)
     {
@@ -29,16 +117,19 @@ public class GameState {
         votes = new int[nbPlayers];
         players = new Player[nbPlayers];
         middleCards = new PlayerType[2];
+        type = TurnType.INIT_GAME_THIEF;
     }
 
-    public int addPlayer()
+    public int addPlayer(String participantId)
     {
         Random rand = new Random();
         PlayerType type;
         int playerId = currentPlayers++;
-        boolean witch = false, cupidon = false, thief = false, hunter = false, seer = false;
+        Player p = new Player(playerId, participantId);
+        players[playerId] = p;
         if(currentPlayers == nbPlayers)
         {
+            boolean witch = false, cupidon = false, thief = false, hunter = false, seer = false;
             for(int i = 0; i < nbPlayers + 2; i++)
             {
                 if(rand.nextFloat() % 2 > 1) {
@@ -68,8 +159,7 @@ public class GameState {
                     type = PlayerType.VILLAGER;
                 }
                 if(i < nbPlayers) {
-                    Player p = new Player(i, type);
-                    players[i] = p;
+                    players[i].setType(type);
                 }
                 else
                 {
@@ -87,12 +177,14 @@ public class GameState {
         state.put(2, leader);
         state.put(3, middleCards[0]);
         state.put(4, middleCards[1]);
+        state.put(5, type);
+        state.put(6, lastPlayedIdPlayer);
         int index;
         for(index = 0; index < nbPlayers; index++)
         {
-            state.put(index + 5, votes[index]);
+            state.put(index + 7, votes[index]);
         }
-        int nextIndex = nbPlayers + 5, playerSize = 0;
+        int nextIndex = nbPlayers + 7, playerSize = 0;
         for(index = 0; index < nbPlayers; index++)
         {
             playerSize = players[index].serialize(state, nextIndex);
@@ -108,12 +200,14 @@ public class GameState {
         leader = state.getInt(2);
         middleCards[0] = (PlayerType) state.get(3);
         middleCards[1] = (PlayerType) state.get(4);
+        type = (TurnType) state.get(5);
+        lastPlayedIdPlayer = state.getInt(6);
         int index;
         for(index = 0; index < nbPlayers; index++)
         {
-            votes[index] = state.getInt(index + 5);
+            votes[index] = state.getInt(index + 7);
         }
-        int nextIndex = nbPlayers + 5, playerSize = 0;
+        int nextIndex = nbPlayers + 7, playerSize = 0;
         for(index = 0; index < nbPlayers; index++)
         {
             playerSize = players[index].unserialize(state, nextIndex);
