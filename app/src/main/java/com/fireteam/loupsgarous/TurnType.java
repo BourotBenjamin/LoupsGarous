@@ -9,4 +9,5 @@ public enum TurnType
     VOTE_FOR_LEADER,
     SEER_TURN,
     WITCH_TURN,
+    WAITING_PLAYERS
 }

@@ -43,8 +43,7 @@ public class VotingActivity extends AppCompatActivity{
                 if(p.isAlive())
                     playerNameList.add(p.getParticipantId());
             }
-            ArrayAdapter<String> arrayAdapter =
-                    new ArrayAdapter<String>(this,android.R.layout.simple_list_item_1, playerNameList);
+            ArrayAdapter<String> arrayAdapter = new ArrayAdapter<String>(this,android.R.layout.simple_list_item_1, playerNameList);
 
             alive.setAdapter(arrayAdapter);
 
@@ -57,7 +56,7 @@ public class VotingActivity extends AppCompatActivity{
                     state.voteToKillPlayer(position);
                     state.getNextPlayerTurn();
                     Toast.makeText(getApplicationContext(), "Vous avez voté contre : " + selectedAnimal, Toast.LENGTH_LONG).show();
-                    Intent intent = new Intent (this, WaitingVotersLobby.class);
+                    Intent intent = new Intent(VotingActivity.this, WaitingVotersLobby.class);
                     intent.putExtra("voter", selectedAnimal);
                     startActivity(intent);
                 }
@@ -65,7 +64,7 @@ public class VotingActivity extends AppCompatActivity{
         }
         catch (JSONException e)
         {
-
+            e.printStackTrace();
         }
 
 

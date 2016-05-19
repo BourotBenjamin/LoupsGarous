@@ -50,6 +50,10 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
     private final Handler mHideHandler = new Handler();
     private View mContentView;
     private GameState state;
+    private String participantId;
+
+    private int CURRENT_PLAYERS = 6, NB_MAX_PLAYERS = 30, NB_MIN_PLAYERS = 2;
+
     private final Runnable mHidePart2Runnable = new Runnable() {
         @SuppressLint("InlinedApi")
         @Override
@@ -208,7 +212,8 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
 
     @Override
     public void onConnected(Bundle connectionHint) {
-        Intent intent = Games.TurnBasedMultiplayer.getSelectOpponentsIntent(mGoogleApiClient, 1, 7, true);
+        participantId = Games.Players.getCurrentPlayer(mGoogleApiClient).getPlayerId();
+        Intent intent = Games.TurnBasedMultiplayer.getSelectOpponentsIntent(mGoogleApiClient, NB_MIN_PLAYERS, NB_MAX_PLAYERS, true);
         startActivityForResult(intent, RC_SELECT_PLAYERS);
 
 
@@ -310,14 +315,10 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
 
     public void initGame(TurnBasedMatch match)
     {
-        try {
-            state.unserialize(match.getData());
-        }
-        catch(JSONException e){
-
-        }
-
+        state.init(CURRENT_PLAYERS);
+        state.addPlayer(match.getParticipantId(participantId));
         try{
+
             byte [] serializedData = state.serialize();
             Games.TurnBasedMultiplayer.takeTurn(mGoogleApiClient, match.getMatchId(), serializedData, null).setResultCallback(
                     new ResultCallback<TurnBasedMultiplayer.UpdateMatchResult>() {
@@ -329,7 +330,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
         }
         catch(JSONException e)
         {
-
+            e.printStackTrace();
         }
 
     }
@@ -340,12 +341,25 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
             state.unserialize(match.getData());
         }
         catch(JSONException e){
+            e.printStackTrace();
+        }
+
+        // TODO Actions !!
+        /** DO ACTIONS HERE **/
+
+        switch(state.getTurnType())
+        {
+            case WAITING_PLAYERS:
+                state.addPlayer(match.getParticipantId(participantId));
+                break;
 
         }
 
+        /** END ACTIONS HERE **/
+
         try {
             byte[] serializedData = state.serialize();
-            Games.TurnBasedMultiplayer.takeTurn(mGoogleApiClient, match.getMatchId(), serializedData, null).setResultCallback(
+            Games.TurnBasedMultiplayer.takeTurn(mGoogleApiClient, match.getMatchId(), serializedData, state.getNextPlayerTurn()).setResultCallback(
                     new ResultCallback<TurnBasedMultiplayer.UpdateMatchResult>() {
                         @Override
                         public void onResult(TurnBasedMultiplayer.UpdateMatchResult result) {
@@ -355,7 +369,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
         }
         catch(JSONException e)
         {
-
+            e.printStackTrace();
         }
     }
 
@@ -372,12 +386,9 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
 
         // If this player is not the first player in this match, continue.
         if (match.getData() != null) {
-            Toast.makeText(this, "Player2 " + match.getData().toString(), Toast.LENGTH_LONG).show();
             playGame(match);
             return;
         }
-        Toast.makeText(this, "Player1 ", Toast.LENGTH_LONG).show();
-
         initGame(match);
         playGame(match);
     }

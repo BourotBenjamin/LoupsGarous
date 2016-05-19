@@ -21,7 +21,7 @@ public class GameState {
     private int nbPlayers;
     private int currentPlayers;
     PlayerType[] middleCards;
-    TurnType type;
+    TurnType turnType;
     private int lastPlayedIdPlayer;
 
     public String getLeaderParticipantId()
@@ -42,25 +42,25 @@ public class GameState {
 
     public TurnType getTurnType()
     {
-        return type;
+        return turnType;
     }
 
     public String getNextPlayerTurn()
     {
         if(currentPlayers == nbPlayers)
         {
-            switch (type)
+            switch (turnType)
             {
                 case INIT_GAME_THIEF:
                     lastPlayedIdPlayer = -1;
-                    type = TurnType.INIT_GAME_CUPIDON;
+                    turnType = TurnType.INIT_GAME_CUPIDON;
                     for (int i = 0; i < nbPlayers; i++)
                         if(players[i].getType() == PlayerType.THIEF)
                             return players[i].getParticipantId();
                     break;
                 case INIT_GAME_CUPIDON:
                     lastPlayedIdPlayer = -1;
-                    type = TurnType.VOTE_FOR_LEADER;
+                    turnType = TurnType.VOTE_FOR_LEADER;
                     for (int i = 0; i < nbPlayers; i++)
                         if(players[i].getType() == PlayerType.CUPIDON)
                             return players[i].getParticipantId();
@@ -70,11 +70,11 @@ public class GameState {
                     if(lastPlayedIdPlayer < nbPlayers)
                         return players[lastPlayedIdPlayer].getParticipantId();
                     else
-                        type = TurnType.SEER_TURN;
+                        turnType = TurnType.SEER_TURN;
                     break;
                 case SEER_TURN:
                     lastPlayedIdPlayer = -1;
-                    type = TurnType.NIGHT;
+                    turnType = TurnType.NIGHT;
                     for (int i = 0; i < nbPlayers; i++)
                         if(players[i].isAlive() && players[i].getType() == PlayerType.SEER)
                             return players[i].getParticipantId();
@@ -85,11 +85,11 @@ public class GameState {
                         if (players[lastPlayedIdPlayer].isAlive() && players[lastPlayedIdPlayer].getType() == PlayerType.WEREWOLF)
                             return players[lastPlayedIdPlayer].getParticipantId();
                     }
-                    type = TurnType.WITCH_TURN;
+                    turnType = TurnType.WITCH_TURN;
                     break;
                 case WITCH_TURN:
                     lastPlayedIdPlayer = -1;
-                    type = TurnType.DAY;
+                    turnType = TurnType.DAY;
                     for (int i = 0; i < nbPlayers; i++)
                         if(players[i].isAlive() && players[i].getType() == PlayerType.WITCH)
                             return players[i].getParticipantId();
@@ -100,7 +100,7 @@ public class GameState {
                         if (players[lastPlayedIdPlayer].isAlive())
                             return players[lastPlayedIdPlayer].getParticipantId();
                     }
-                    type = TurnType.SEER_TURN;
+                    turnType = TurnType.SEER_TURN;
                     break;
 
             }
@@ -116,7 +116,7 @@ public class GameState {
         votes = new int[nbPlayers];
         players = new Player[nbPlayers];
         middleCards = new PlayerType[2];
-        type = TurnType.INIT_GAME_THIEF;
+        turnType = TurnType.WAITING_PLAYERS;
     }
 
     public int addPlayer(String participantId)
@@ -164,6 +164,7 @@ public class GameState {
                 {
                     middleCards[i - nbPlayers] = type;
                 }
+                turnType = TurnType.INIT_GAME_THIEF;
             }
         }
         return playerId;
@@ -176,7 +177,7 @@ public class GameState {
         state.put(2, leader);
         state.put(3, middleCards[0]);
         state.put(4, middleCards[1]);
-        state.put(5, type);
+        state.put(5, turnType);
         state.put(6, lastPlayedIdPlayer);
         int index;
         for(index = 0; index < nbPlayers; index++)
@@ -199,7 +200,7 @@ public class GameState {
         leader = state.getInt(2);
         middleCards[0] = (PlayerType) state.get(3);
         middleCards[1] = (PlayerType) state.get(4);
-        type = (TurnType) state.get(5);
+        turnType = (TurnType) state.get(5);
         lastPlayedIdPlayer = state.getInt(6);
         int index;
         for(index = 0; index < nbPlayers; index++)
