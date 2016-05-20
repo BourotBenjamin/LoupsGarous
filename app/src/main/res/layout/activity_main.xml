@@ -73,7 +73,7 @@
         android:background="#dea62d">
 
         <ListView
-            android:id="@+id/listViewPlayersAlive"
+            android:id="@+id/listViewPlayersDied"
             android:layout_width="180dp"
             android:layout_height="match_parent"
             android:dividerHeight="0.8dp"
@@ -84,7 +84,7 @@
             android:drawSelectorOnTop="false"/>
 
         <ListView
-            android:id="@+id/listViewPlayersDied"
+            android:id="@+id/listViewPlayersAlive"
             android:layout_width="180dp"
             android:layout_marginLeft="10dp"
             android:layout_height="match_parent"
