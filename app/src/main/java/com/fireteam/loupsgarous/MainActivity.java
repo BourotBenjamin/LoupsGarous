@@ -519,20 +519,18 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
         ArrayList<String> playerDeadList = new ArrayList<String>();
         for(Player p : state.getPlayers())
         {
-            if(p != null)
-                if(p.isAlive())
-                {
+            if(p != null) {
+                if (p.isAlive()) {
                     playerAliveList.add(p.getParticipantId());
+                } else {
+                    playerDeadList.add(p.getParticipantId() + " : " + p.getTypeName());
                 }
-                else
-                {
-                    playerDeadList.add(p.getParticipantId()+ " : " + p.getTypeName());
-                }
+            }
         }
         ArrayAdapter<String> arrayAdapter = new ArrayAdapter<String>(this,android.R.layout.simple_list_item_1, playerAliveList);
         alive.setAdapter(arrayAdapter);
         ArrayAdapter<String> arrayAdapter2 = new ArrayAdapter<String>(this,android.R.layout.simple_list_item_2, playerDeadList);
-        alive.setAdapter(arrayAdapter);
+        died.setAdapter(arrayAdapter2);
         TextView myClass = (TextView) findViewById(R.id.myOwnClass);
         myClass.setText(state.getPlayerType(playerId));
         TextView isAlive = (TextView) findViewById(R.id.amIAlive);
