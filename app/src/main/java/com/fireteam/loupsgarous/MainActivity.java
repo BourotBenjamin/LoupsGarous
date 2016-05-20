@@ -326,7 +326,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
                     return;
                 }
                 int position = data.getIntExtra("position", -1);
-                Toast.makeText(getApplicationContext(), R.string.vote_for + state.getPlayerName(position), Toast.LENGTH_LONG).show();
+                Toast.makeText(getApplicationContext(), getResources().getString(R.string.vote_for) + state.getPlayerName(position), Toast.LENGTH_LONG).show();
                 state.voteToSetLeader(position);
                 state.getNextPlayerTurn();
                 takeTurn(match);
@@ -336,7 +336,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
                     return;
                 }
                 int playerToKill = data.getIntExtra("position", -1);
-                Toast.makeText(getApplicationContext(), R.string.vote_against + state.getPlayerName(playerToKill), Toast.LENGTH_LONG).show();
+                Toast.makeText(getApplicationContext(), getResources().getString(R.string.vote_against) + state.getPlayerName(playerToKill), Toast.LENGTH_LONG).show();
                 state.voteToKillPlayer(playerToKill);
                 state.getNextPlayerTurn();
                 takeTurn(match);
@@ -347,12 +347,12 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
                 }
                 int playerToSave = data.getIntExtra("position", -1);
                 if(playerToSave != -1) {
-                    Toast.makeText(getApplicationContext(), R.string.save_player, Toast.LENGTH_LONG).show();
+                    Toast.makeText(getApplicationContext(), getResources().getString(R.string.save_player), Toast.LENGTH_LONG).show();
                     state.killPlayer(playerToSave);
                 }
                 else
                 {
-                    Toast.makeText(getApplicationContext(), R.string.let_kill + state.getPlayerName(playerToSave), Toast.LENGTH_LONG).show();
+                    Toast.makeText(getApplicationContext(), getResources().getString(R.string.let_kill) + state.getPlayerName(playerToSave), Toast.LENGTH_LONG).show();
                 }
                 state.getNextPlayerTurn();
                 takeTurn(match);
@@ -371,7 +371,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
                     return;
                 }
                 int positionToSee = data.getIntExtra("position", -1);
-                Toast.makeText(getApplicationContext(),  R.string.player_is + state.getPlayerType(positionToSee), Toast.LENGTH_LONG).show();
+                Toast.makeText(getApplicationContext(),  getResources().getString(R.string.player_is) + state.getPlayerType(positionToSee), Toast.LENGTH_LONG).show();
                 takeTurn(match);
 
 
@@ -529,9 +529,9 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
         myClass.setText(state.getPlayerType(playerId));
         TextView isAlive = (TextView) findViewById(R.id.amIAlive);
         if(state.isPlayerAlive(playerId))
-            myClass.setText(R.string.alive);
+            isAlive.setText(getResources().getString(R.string.alive));
         else
-            myClass.setText(R.string.dead);
+            isAlive.setText(getResources().getString(R.string.dead));
 
         /** END SHOW WHAT HAPPENS LAST TURN HERE **/
     }
