@@ -10,6 +10,8 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.widget.Toast;
 
+import com.fireteam.loupsgarous.player.KillState;
+import com.fireteam.loupsgarous.player.Player;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.common.api.ResultCallback;
@@ -136,7 +138,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
             }
         });
 
-        state = new GameState();
+        state = new GameState(this);
         // Upon interacting with UI controls, delay any scheduled hide()
         // operations to prevent the jarring behavior of controls going away
         // while interacting with the UI.
@@ -273,7 +275,9 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
 
     private static final int RC_SIGN_IN = 9001;
     private static final int RC_SELECT_PLAYERS = 9002;
-    private static final int PLAYER_VOTE = 9003;
+    private static final int PLAYER_VOTE_TO_KILL = 9003;
+    private static final int WITCH_KILL_PLAYER = 9004;
+    private static final int PLAYER_VOTE_TO_LOVE = 9005;
 
     @Override
     protected void onActivityResult(int request, int result, Intent data) {
@@ -312,17 +316,40 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
                             }
                         });
                 break;
-            case PLAYER_VOTE:
+            case PLAYER_VOTE_TO_KILL:
                 if (result != RESULT_OK) {
                     return;
                 }
                 int position = data.getIntExtra("position", -1);
                 //String selectedAnimal = playerNameList.get(position);
+                //Toast.makeText(getApplicationContext(), "Vous avez voté contre : " + selectedAnimal, Toast.LENGTH_LONG).show();
                 state.voteToKillPlayer(position);
                 state.getNextPlayerTurn();
-                //Toast.makeText(getApplicationContext(), "Vous avez voté contre : " + selectedAnimal, Toast.LENGTH_LONG).show();
                 takeTurn(match);
                 break;
+            case WITCH_KILL_PLAYER:
+                if (result != RESULT_OK) {
+                    return;
+                }
+                int playerToKill = data.getIntExtra("position", -1);
+                //String selectedAnimal = playerNameList.get(position);
+                //Toast.makeText(getApplicationContext(), "Vous avez voté contre : " + selectedAnimal, Toast.LENGTH_LONG).show();
+                if(playerToKill != -1)
+                    state.killPlayer(playerToKill);
+                state.getNextPlayerTurn();
+                takeTurn(match);
+                break;
+            case PLAYER_VOTE_TO_LOVE:
+                if (result != RESULT_OK) {
+                    return;
+                }
+                int firstLover = data.getIntExtra("firstLover", -1);
+                int secondLover = data.getIntExtra("secondLover", -1);
+                state.setLovers(firstLover, secondLover);
+                state.getNextPlayerTurn();
+                takeTurn(match);
+
+
         }
     }
 
@@ -375,7 +402,13 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
     {
         try {
             byte[] serializedData = state.serialize();
-            Games.TurnBasedMultiplayer.takeTurn(mGoogleApiClient, match.getMatchId(), serializedData, state.getNextPlayerTurn()).setResultCallback(
+            String nextPlayerToPlay = state.getNextPlayerTurn();
+            if(nextPlayerToPlay == null)
+            {
+                nextPlayerToPlay = state.getNextPlayerTurn();
+                //TODO What to do if player is null (END OF NIGHT / DAY /
+            }
+            Games.TurnBasedMultiplayer.takeTurn(mGoogleApiClient, match.getMatchId(), serializedData, nextPlayerToPlay).setResultCallback(
                     new ResultCallback<TurnBasedMultiplayer.UpdateMatchResult>() {
                         @Override
                         public void onResult(TurnBasedMultiplayer.UpdateMatchResult result) {
@@ -438,14 +471,14 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
             askForRematch();
         }*/
         boolean isDoingTurn = (match.getTurnStatus() == TurnBasedMatch.MATCH_TURN_STATUS_MY_TURN);
-        Toast.makeText(this, "Played ", Toast.LENGTH_LONG).show();
 
-        if (match.getData() != null) {
-            Toast.makeText(this, "Data: " + match.getData().toString(), Toast.LENGTH_LONG).show();
-        }
-        updateGame(match);
         if (isDoingTurn) {
             playGame(match);
+            return;
+        }
+        else
+        {
+            updateGame(match);
             return;
         }
     }
