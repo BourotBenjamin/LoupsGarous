@@ -13,7 +13,7 @@
     <string name="save_player">Vous avez sauvé le joueur.</string>
     <string name="let_kill">Vous avez laissé le groupe tuer </string>
     <string name="player_is">Ce joueur est un </string>
-    <string name="died"> est mort. C'était un </string>
+    <string name="died"> est mort. C\'était un </string>
     <string name="lover">Il était amoureux de </string>
     <string name="was"> qui était un </string>
     <string name="new_leader"> est votre nouveau leader.</string>

@@ -59,7 +59,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
     private int playerId;
     private TurnBasedMatch match;
 
-    private int CURRENT_PLAYERS = 6, NB_MAX_PLAYERS = 30, NB_MIN_PLAYERS = 2;
+    private int CURRENT_PLAYERS = 3, NB_MAX_PLAYERS = 30, NB_MIN_PLAYERS = 2;
 
     private final Runnable mHidePart2Runnable = new Runnable() {
         @SuppressLint("InlinedApi")
@@ -134,18 +134,18 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
 
 
         // Set up the user interaction to manually show or hide the system UI.
-        mContentView.setOnClickListener(new View.OnClickListener() {
+       /* mContentView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 toggle();
             }
-        });
+        });*/
 
         state = new GameState(this);
         // Upon interacting with UI controls, delay any scheduled hide()
         // operations to prevent the jarring behavior of controls going away
         // while interacting with the UI.
-        findViewById(R.id.play_button).setOnTouchListener(mDelayHideTouchListener);
+        /*findViewById(R.id.play_button).setOnTouchListener(mDelayHideTouchListener);*/
 
 
 
@@ -174,15 +174,15 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
     }
 
     private void toggle() {
-        if (mVisible) {
+       /* if (mVisible) {
             hide();
         } else {
             show();
-        }
+        }*/
     }
 
     private void hide() {
-        // Hide UI first
+        /*// Hide UI first
         ActionBar actionBar = getSupportActionBar();
         if (actionBar != null) {
             actionBar.hide();
@@ -192,11 +192,11 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
 
         // Schedule a runnable to remove the status and navigation bar after a delay
         mHideHandler.removeCallbacks(mShowPart2Runnable);
-        mHideHandler.postDelayed(mHidePart2Runnable, UI_ANIMATION_DELAY);
+        mHideHandler.postDelayed(mHidePart2Runnable, UI_ANIMATION_DELAY);*/
     }
 
     @SuppressLint("InlinedApi")
-    private void show() {
+    private void show() {/*
         // Show the system bar
         mContentView.setSystemUiVisibility(View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
                 | View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION);
@@ -204,7 +204,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
 
         // Schedule a runnable to display UI elements after a delay
         mHideHandler.removeCallbacks(mHidePart2Runnable);
-        mHideHandler.postDelayed(mShowPart2Runnable, UI_ANIMATION_DELAY);
+        mHideHandler.postDelayed(mShowPart2Runnable, UI_ANIMATION_DELAY);*/
     }
 
     /**
@@ -512,14 +512,15 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
         ArrayList<String> playerDeadList = new ArrayList<String>();
         for(Player p : state.getPlayers())
         {
-            if(p.isAlive())
-            {
-                playerAliveList.add(p.getParticipantId());
-            }
-            else
-            {
-                playerDeadList.add(p.getParticipantId()+ " : " + p.getTypeName());
-            }
+            if(p != null)
+                if(p.isAlive())
+                {
+                    playerAliveList.add(p.getParticipantId());
+                }
+                else
+                {
+                    playerDeadList.add(p.getParticipantId()+ " : " + p.getTypeName());
+                }
         }
         ArrayAdapter<String> arrayAdapter = new ArrayAdapter<String>(this,android.R.layout.simple_list_item_1, playerAliveList);
         alive.setAdapter(arrayAdapter);

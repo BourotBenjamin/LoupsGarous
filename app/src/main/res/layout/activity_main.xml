@@ -19,7 +19,8 @@
         android:paddingLeft="90dp"/>
 
 
-    <ImageView
+
+    <TextView
         android:id="@+id/myOwnClass"
         android:layout_height="300dp"
         android:layout_width="match_parent"

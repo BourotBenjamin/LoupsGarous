@@ -5,6 +5,7 @@ import android.widget.Toast;
 import com.fireteam.loupsgarous.player.KillState;
 import com.fireteam.loupsgarous.player.Player;
 import com.fireteam.loupsgarous.player.PlayerType;
+import com.google.android.gms.games.stats.PlayerStats;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -208,7 +209,7 @@ public class GameState {
             state.put(index + 9, votes[index]);
         }
         int nextIndex = nbPlayers + 9, playerSize = 0;
-        for(index = 0; index < nbPlayers; index++)
+        for(index = 0; index < currentPlayers; index++)
         {
             playerSize = players[index].serialize(state, nextIndex);
             nextIndex += playerSize;
@@ -221,8 +222,8 @@ public class GameState {
         nbPlayers = state.getInt(0);
         currentPlayers = state.getInt(1);
         leader = state.getInt(2);
-        middleCards[0] = (PlayerType) state.get(3);
-        middleCards[1] = (PlayerType) state.get(4);
+        middleCards[0] = PlayerType.values()[state.getInt(3)];
+        middleCards[1] = PlayerType.values()[state.getInt(4)];
         turnType = (TurnType) state.get(5);
         lastPlayedIdPlayer = state.getInt(6);
         launchKillPlayer = state.getBoolean(7);
