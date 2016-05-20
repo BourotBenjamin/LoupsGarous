@@ -567,6 +567,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
 
         if (isDoingTurn) {
             playGame(match);
+            updateGame(match);
             return;
         }
         else
