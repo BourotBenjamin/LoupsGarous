@@ -37,7 +37,7 @@ public class VotingActivityWich extends AppCompatActivity {
     public void OnYesClicked(View v)
     {
         Intent intent = new Intent();
-        intent.putExtra("playerToKill", playertoKill.getPlayerID());
+        intent.putExtra("playerToKill", playertoKill.getPlayerId());
         setResult(RESULT_OK, intent);
         finish();
     }

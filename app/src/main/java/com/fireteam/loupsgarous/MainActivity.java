@@ -276,8 +276,10 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
     private static final int RC_SIGN_IN = 9001;
     private static final int RC_SELECT_PLAYERS = 9002;
     private static final int PLAYER_VOTE_TO_KILL = 9003;
-    private static final int WITCH_KILL_PLAYER = 9004;
+    private static final int PLAYER_VOTE_TO_SAVE = 9004;
     private static final int PLAYER_VOTE_TO_LOVE = 9005;
+    private static final int PLAYER_VOTE_TO_SEE = 9006;
+    private static final int PLAYER_VOTE_TO_ELECT = 9007;
 
     @Override
     protected void onActivityResult(int request, int result, Intent data) {
@@ -316,26 +318,41 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
                             }
                         });
                 break;
-            case PLAYER_VOTE_TO_KILL:
+            case PLAYER_VOTE_TO_ELECT:
                 if (result != RESULT_OK) {
                     return;
                 }
                 int position = data.getIntExtra("position", -1);
-                //String selectedAnimal = playerNameList.get(position);
-                //Toast.makeText(getApplicationContext(), "Vous avez voté contre : " + selectedAnimal, Toast.LENGTH_LONG).show();
-                state.voteToKillPlayer(position);
+                Toast.makeText(getApplicationContext(), "Vous avez voté pour : " + state.getPlayerName(position), Toast.LENGTH_LONG).show();
+                state.voteToSetLeader(position);
                 state.getNextPlayerTurn();
                 takeTurn(match);
                 break;
-            case WITCH_KILL_PLAYER:
+            case PLAYER_VOTE_TO_KILL:
                 if (result != RESULT_OK) {
                     return;
                 }
                 int playerToKill = data.getIntExtra("position", -1);
+                Toast.makeText(getApplicationContext(), "Vous avez voté contre : " + state.getPlayerName(playerToKill), Toast.LENGTH_LONG).show();
+                state.voteToKillPlayer(playerToKill);
+                state.getNextPlayerTurn();
+                takeTurn(match);
+                break;
+            case PLAYER_VOTE_TO_SAVE:
+                if (result != RESULT_OK) {
+                    return;
+                }
+                int playerToSave = data.getIntExtra("position", -1);
                 //String selectedAnimal = playerNameList.get(position);
                 //Toast.makeText(getApplicationContext(), "Vous avez voté contre : " + selectedAnimal, Toast.LENGTH_LONG).show();
-                if(playerToKill != -1)
-                    state.killPlayer(playerToKill);
+                if(playerToSave != -1) {
+                    Toast.makeText(getApplicationContext(), "Vous avez sauvé le joueur", Toast.LENGTH_LONG).show();
+                    state.killPlayer(playerToSave);
+                }
+                else
+                {
+                    Toast.makeText(getApplicationContext(), "Vous avez laissé le groupe tuer " + state.getPlayerName(playerToSave), Toast.LENGTH_LONG).show();
+                }
                 state.getNextPlayerTurn();
                 takeTurn(match);
                 break;
@@ -347,6 +364,13 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
                 int secondLover = data.getIntExtra("secondLover", -1);
                 state.setLovers(firstLover, secondLover);
                 state.getNextPlayerTurn();
+                takeTurn(match);
+            case PLAYER_VOTE_TO_SEE:
+                if (result != RESULT_OK) {
+                    return;
+                }
+                int positionToSee = data.getIntExtra("position", -1);
+                Toast.makeText(getApplicationContext(), "Ce joueur est un " + state.getPlayerType(positionToSee), Toast.LENGTH_LONG).show();
                 takeTurn(match);
 
 

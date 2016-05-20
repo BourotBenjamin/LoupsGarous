@@ -5,13 +5,13 @@ android {
         debug {
             keyAlias 'androiddebugkey'
             keyPassword 'fireteam'
-            storeFile file('C:/Users/Philoupe/AndroidStudioProjects/LoupsGarous/androiddebugkeystore')
+            storeFile file('../androiddebugkeystore')
             storePassword 'fireteam'
         }
         prod {
             keyAlias 'client'
             keyPassword 'fireteam'
-            storeFile file('C:/Users/Philoupe/AndroidStudioProjects/LoupsGarous/clientkeystore')
+            storeFile file('../clientkeystore')
             storePassword 'fireteam'
         }
     }

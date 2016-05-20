@@ -27,10 +27,16 @@ public class GameState {
     private int lastPlayedIdPlayer;
     private MainActivity mainActivity;
     private boolean launchKillPlayer;
+    private boolean launchSetLeader;
 
     public GameState(MainActivity mainActivity)
     {
         this.mainActivity = mainActivity;
+    }
+
+    public String getPlayerName(int playerId)
+    {
+        return players[playerId].getParticipantId();
     }
 
     public String getLeaderParticipantId()
@@ -79,8 +85,10 @@ public class GameState {
                     ++lastPlayedIdPlayer;
                     if(lastPlayedIdPlayer < nbPlayers)
                         return players[lastPlayedIdPlayer].getParticipantId();
-                    else
+                    else {
                         turnType = TurnType.SEER_TURN;
+                        launchSetLeader = true;
+                    }
                     break;
                 case SEER_TURN:
                     lastPlayedIdPlayer = -1;
@@ -193,12 +201,13 @@ public class GameState {
         state.put(5, turnType);
         state.put(6, lastPlayedIdPlayer);
         state.put(7, launchKillPlayer);
+        state.put(8, launchSetLeader);
         int index;
         for(index = 0; index < nbPlayers; index++)
         {
-            state.put(index + 8, votes[index]);
+            state.put(index + 9, votes[index]);
         }
-        int nextIndex = nbPlayers + 8, playerSize = 0;
+        int nextIndex = nbPlayers + 9, playerSize = 0;
         for(index = 0; index < nbPlayers; index++)
         {
             playerSize = players[index].serialize(state, nextIndex);
@@ -217,12 +226,13 @@ public class GameState {
         turnType = (TurnType) state.get(5);
         lastPlayedIdPlayer = state.getInt(6);
         launchKillPlayer = state.getBoolean(7);
+        launchSetLeader = state.getBoolean(8);
         int index;
         for(index = 0; index < nbPlayers; index++)
         {
-            votes[index] = state.getInt(index + 8);
+            votes[index] = state.getInt(index + 9);
         }
-        int nextIndex = nbPlayers + 8, playerSize = 0;
+        int nextIndex = nbPlayers + 9, playerSize = 0;
         for(index = 0; index < nbPlayers; index++)
         {
             playerSize = players[index].unserialize(state, nextIndex);
@@ -230,6 +240,8 @@ public class GameState {
         }
         if(launchKillPlayer)
             killPlayer(-1);
+        if(launchSetLeader)
+            setLeader(-1);
         return this;
     }
 
@@ -335,12 +347,13 @@ public class GameState {
         if(playerIdToSetLeader == - 1)
             playerIdToSetLeader = getPlayerIdToSetLeader();
         players[playerIdToSetLeader].setLeader();
+        Toast.makeText(mainActivity.getApplicationContext(), players[playerIdToSetLeader].getParticipantId()+" est votre nouveau leader.", Toast.LENGTH_LONG).show();
         leader = playerIdToSetLeader;
     }
 
-    public PlayerType getPlayerType(int playerId)
+    public String getPlayerType(int playerId)
     {
-        return players[playerId].getType();
+        return players[playerId].getTypeName();
     }
 
     public PlayerType[] getCardsForThief()
