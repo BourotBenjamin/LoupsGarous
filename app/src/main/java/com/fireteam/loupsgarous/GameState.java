@@ -224,7 +224,7 @@ public class GameState {
         leader = state.getInt(2);
         middleCards[0] = PlayerType.values()[state.getInt(3)];
         middleCards[1] = PlayerType.values()[state.getInt(4)];
-        turnType = (TurnType) state.get(5);
+        turnType = TurnType.values()[state.getInt(5)];
         lastPlayedIdPlayer = state.getInt(6);
         launchKillPlayer = state.getBoolean(7);
         launchSetLeader = state.getBoolean(8);
