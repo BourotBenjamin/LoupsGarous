@@ -1,61 +1,101 @@
-<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
-    android:layout_width="fill_parent"
-    android:layout_height="fill_parent"
-    android:background="#9b4841"
-    tools:context="com.fireteam.loupsgarous.MainActivity">
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:background="@drawable/rect_round_corner"
+    android:layout_centerInParent="true">
 
-    <!-- The primary full-screen view. This can be replaced with whatever view
-         is needed to present your content, e.g. VideoView, SurfaceView,
-         TextureView, etc. -->
     <TextView
-        android:id="@+id/fullscreen_content"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:gravity="center_horizontal"
-        android:keepScreenOn="true"
-        android:text="@string/game_name"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:text="status du jeu"
         android:textColor="#dea62d"
-        android:textSize="50sp"
-        android:textStyle="bold" />
+        android:textStyle="bold"
+        android:textSize="35dp"
+        android:gravity="center"
+        android:paddingTop="10dp"
+        android:paddingRight="80dp"
+        android:paddingLeft="90dp"/>
+
 
     <ImageView
-        android:layout_height="615px"
-        android:layout_width="608px"
+        android:id="@+id/myOwnClass"
+        android:layout_height="300dp"
+        android:layout_width="match_parent"
         android:scaleType="fitCenter"
-        android:layout_gravity="center"
-        android:src="@mipmap/loup_garou_cover" />
+        android:layout_gravity="center"/>
 
+    <TextView
+        android:id="@+id/amIAlive"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:text="je suis"
+        android:textColor="#dea62d"
+        android:textStyle="bold"
+        android:textSize="30dp"
+        android:gravity="center"/>
 
-
-    <!-- This FrameLayout insets its children based on system windows using
-         android:fitsSystemWindows. -->
-    <FrameLayout
+    <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+        android:orientation="horizontal"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:fitsSystemWindows="true">
+        android:background="@drawable/rect_round_corner"
+        android:layout_centerInParent="true">
 
-        <LinearLayout
-            android:id="@+id/fullscreen_content_controls"
-            style="?metaButtonBarStyle"
-            android:layout_width="match_parent"
+        <TextView
+            android:layout_width="100dp"
             android:layout_height="wrap_content"
-            android:layout_gravity="bottom|center_horizontal"
-            android:background="@color/black_overlay"
-            android:orientation="horizontal"
-            tools:ignore="UselessParent">
+            android:text="mort :"
+            android:textColor="#dea62d"
+            android:textStyle="bold"
+            android:textSize="20dp"
+            android:layout_marginLeft="50dp"
+            android:gravity="left" />
 
-            <Button
-                android:id="@+id/play_button"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:background="#dea62d"
-                android:text="@string/play_button"
-                android:textStyle="bold"
-                android:textSize="20sp"/>
+        <TextView
+            android:layout_width="100dp"
+            android:layout_height="wrap_content"
+            android:text="en vie :"
+            android:textColor="#dea62d"
+            android:textStyle="bold"
+            android:textSize="20dp"
+            android:layout_marginLeft="50dp"
+            android:gravity="right" />
 
-        </LinearLayout>
-    </FrameLayout>
+    </LinearLayout>
 
-</FrameLayout>
+    <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="horizontal"
+        android:background="#dea62d">
+
+        <ListView
+            android:id="@+id/listViewPlayersAlive"
+            android:layout_width="180dp"
+            android:layout_height="match_parent"
+            android:dividerHeight="0.8dp"
+            android:divider="#0000CC"
+            android:textStyle="bold"
+            android:layout_alignParentTop="true"
+            android:layout_centerHorizontal="true"
+            android:drawSelectorOnTop="false"/>
+
+        <ListView
+            android:id="@+id/listViewPlayersDied"
+            android:layout_width="180dp"
+            android:layout_marginLeft="10dp"
+            android:layout_height="match_parent"
+            android:dividerHeight="0.8dp"
+            android:divider="#0000CC"
+            android:textStyle="bold"
+            android:layout_alignParentTop="true"
+            android:layout_centerHorizontal="true"
+            android:drawSelectorOnTop="false"/>
+
+    </LinearLayout>
+
+</LinearLayout>
+
+

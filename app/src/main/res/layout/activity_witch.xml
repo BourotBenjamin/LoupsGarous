@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#dea62d"
+    android:layout_centerInParent="true">
+
+    <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+        android:orientation="vertical"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:background="@drawable/rect_round_corner"
+        android:layout_centerInParent="true">
+
+        <TextView
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:text="Sorcière, décidez-vous de sauver la cible ?"
+            android:textColor="#dea62d"
+            android:textStyle="bold"
+            android:textSize="35dp"
+            android:gravity="center"
+            android:padding="25dp"/>
+
+        <TextView
+            android:id="@+id/playerToKill"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:text="Sorcière"
+            android:textColor="#dea62d"
+            android:textSize="35dp"
+            android:gravity="center"
+            android:padding="25dp"/>
+
+    </LinearLayout>
+
+    <CheckBox
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:gravity="center"
+        android:text="oui"
+        android:textSize="35dp"
+        android:layout_marginTop="50dp"
+        android:layout_marginLeft="150dp"
+        android:onClick="onYesClicked"/>
+
+    <CheckBox
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:gravity="center"
+        android:text="non"
+        android:textSize="35dp"
+        android:layout_marginTop="50dp"
+        android:layout_marginLeft="150dp"
+        android:onClick="onNoClicked"/>
+
+</LinearLayout>
