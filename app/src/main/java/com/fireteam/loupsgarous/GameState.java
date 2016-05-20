@@ -1,5 +1,7 @@
 package com.fireteam.loupsgarous;
 
+import android.widget.Toast;
+
 import com.fireteam.loupsgarous.player.KillState;
 import com.fireteam.loupsgarous.player.Player;
 import com.fireteam.loupsgarous.player.PlayerType;
@@ -23,6 +25,13 @@ public class GameState {
     PlayerType[] middleCards;
     TurnType turnType;
     private int lastPlayedIdPlayer;
+    private MainActivity mainActivity;
+    private boolean launchKillPlayer;
+
+    public GameState(MainActivity mainActivity)
+    {
+        this.mainActivity = mainActivity;
+    }
 
     public String getLeaderParticipantId()
     {
@@ -47,6 +56,7 @@ public class GameState {
 
     public String getNextPlayerTurn()
     {
+        launchKillPlayer = false;
         if(currentPlayers == nbPlayers)
         {
             switch (turnType)
@@ -93,6 +103,7 @@ public class GameState {
                     for (int i = 0; i < nbPlayers; i++)
                         if(players[i].isAlive() && players[i].getType() == PlayerType.WITCH)
                             return players[i].getParticipantId();
+                    launchKillPlayer = true;
                     break;
                 case DAY:
                     while(lastPlayedIdPlayer < nbPlayers) {
@@ -100,6 +111,7 @@ public class GameState {
                         if (players[lastPlayedIdPlayer].isAlive())
                             return players[lastPlayedIdPlayer].getParticipantId();
                     }
+                    launchKillPlayer = true;
                     turnType = TurnType.SEER_TURN;
                     break;
 
@@ -117,6 +129,7 @@ public class GameState {
         players = new Player[nbPlayers];
         middleCards = new PlayerType[2];
         turnType = TurnType.WAITING_PLAYERS;
+        launchKillPlayer = false;
     }
 
     public int addPlayer(String participantId)
@@ -179,12 +192,13 @@ public class GameState {
         state.put(4, middleCards[1]);
         state.put(5, turnType);
         state.put(6, lastPlayedIdPlayer);
+        state.put(7, launchKillPlayer);
         int index;
         for(index = 0; index < nbPlayers; index++)
         {
-            state.put(index + 7, votes[index]);
+            state.put(index + 8, votes[index]);
         }
-        int nextIndex = nbPlayers + 7, playerSize = 0;
+        int nextIndex = nbPlayers + 8, playerSize = 0;
         for(index = 0; index < nbPlayers; index++)
         {
             playerSize = players[index].serialize(state, nextIndex);
@@ -202,17 +216,20 @@ public class GameState {
         middleCards[1] = (PlayerType) state.get(4);
         turnType = (TurnType) state.get(5);
         lastPlayedIdPlayer = state.getInt(6);
+        launchKillPlayer = state.getBoolean(7);
         int index;
         for(index = 0; index < nbPlayers; index++)
         {
-            votes[index] = state.getInt(index + 7);
+            votes[index] = state.getInt(index + 8);
         }
-        int nextIndex = nbPlayers + 7, playerSize = 0;
+        int nextIndex = nbPlayers + 8, playerSize = 0;
         for(index = 0; index < nbPlayers; index++)
         {
             playerSize = players[index].unserialize(state, nextIndex);
             nextIndex += playerSize;
         }
+        if(launchKillPlayer)
+            killPlayer(-1);
         return this;
     }
 
@@ -252,9 +269,11 @@ public class GameState {
             playerToKill = getPlayerToKill();
         else
             playerToKill = players[playerIdToKill];
-        if(playerToKill != null) {
+        if(playerToKill != null && playerToKill.isAlive()) {
             playerToKill.kill();
+            Toast.makeText(mainActivity.getApplicationContext(), playerToKill.getParticipantId()+" est mort. Il étatit " + playerToKill.getTypeName(), Toast.LENGTH_LONG).show();
             if (playerToKill.getLoverId() != -1) {
+                Toast.makeText(mainActivity.getApplicationContext(), "Il était amoureux de " + players[playerToKill.getLoverId()].getParticipantId()+" qui étatit " + playerToKill.getTypeName(), Toast.LENGTH_LONG).show();
                 players[playerToKill.getLoverId()].kill();
                 if(playerToKill.getType() == PlayerType.HUNTER) {
                     if (players[playerToKill.getLoverId()].isLeader() || playerToKill.isLeader())

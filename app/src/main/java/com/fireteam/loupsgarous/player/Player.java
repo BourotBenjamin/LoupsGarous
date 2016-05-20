@@ -13,12 +13,38 @@ public class Player {
     boolean leader;
     String participantId;
 
+    public int getPlayerId() {
+        return playerId;
+    }
+
     public Player(int playerId, String participantId)
     {
         this.playerId = playerId;
         this.alive = true;
         this.participantId = participantId;
         this.loverId = -1;
+    }
+
+    public String getTypeName()
+    {
+        switch (type)
+        {
+            case CUPIDON:
+                return "Cupidon";
+            case HUNTER:
+                return "Chasseur";
+            case SEER:
+                return "Voyant";
+            case THIEF:
+                return "Voleur";
+            case VILLAGER:
+                return "Villageois";
+            case WEREWOLF:
+                return "Loup";
+            case WITCH:
+                return "Sorcier";
+        }
+        return "";
     }
 
     public void setLeader() {
