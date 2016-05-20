@@ -250,6 +250,11 @@ public class GameState {
         votes[playerId] += 1;
     }
 
+    public boolean isPlayerAlive(int playerId)
+    {
+        return players[playerId].isAlive();
+    }
+
     public Player getPlayerToKill()
     {
         int best = -1, bestScore = -1;
@@ -283,9 +288,9 @@ public class GameState {
             playerToKill = players[playerIdToKill];
         if(playerToKill != null && playerToKill.isAlive()) {
             playerToKill.kill();
-            Toast.makeText(mainActivity.getApplicationContext(), playerToKill.getParticipantId()+" est mort. Il étatit " + playerToKill.getTypeName(), Toast.LENGTH_LONG).show();
+            Toast.makeText(mainActivity.getApplicationContext(), playerToKill.getParticipantId()+ R.string.died + playerToKill.getTypeName(), Toast.LENGTH_LONG).show();
             if (playerToKill.getLoverId() != -1) {
-                Toast.makeText(mainActivity.getApplicationContext(), "Il était amoureux de " + players[playerToKill.getLoverId()].getParticipantId()+" qui étatit " + playerToKill.getTypeName(), Toast.LENGTH_LONG).show();
+                Toast.makeText(mainActivity.getApplicationContext(), R.string.lover + players[playerToKill.getLoverId()].getParticipantId()+R.string.was + playerToKill.getTypeName(), Toast.LENGTH_LONG).show();
                 players[playerToKill.getLoverId()].kill();
                 if(playerToKill.getType() == PlayerType.HUNTER) {
                     if (players[playerToKill.getLoverId()].isLeader() || playerToKill.isLeader())
@@ -347,7 +352,7 @@ public class GameState {
         if(playerIdToSetLeader == - 1)
             playerIdToSetLeader = getPlayerIdToSetLeader();
         players[playerIdToSetLeader].setLeader();
-        Toast.makeText(mainActivity.getApplicationContext(), players[playerIdToSetLeader].getParticipantId()+" est votre nouveau leader.", Toast.LENGTH_LONG).show();
+        Toast.makeText(mainActivity.getApplicationContext(), players[playerIdToSetLeader].getParticipantId()+  R.string.new_leader, Toast.LENGTH_LONG).show();
         leader = playerIdToSetLeader;
     }
 

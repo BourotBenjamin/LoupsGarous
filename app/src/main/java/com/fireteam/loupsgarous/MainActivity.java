@@ -8,6 +8,9 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.view.MotionEvent;
 import android.view.View;
+import android.widget.ArrayAdapter;
+import android.widget.ListView;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.fireteam.loupsgarous.player.KillState;
@@ -323,7 +326,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
                     return;
                 }
                 int position = data.getIntExtra("position", -1);
-                Toast.makeText(getApplicationContext(), "Vous avez voté pour : " + state.getPlayerName(position), Toast.LENGTH_LONG).show();
+                Toast.makeText(getApplicationContext(), R.string.vote_for + state.getPlayerName(position), Toast.LENGTH_LONG).show();
                 state.voteToSetLeader(position);
                 state.getNextPlayerTurn();
                 takeTurn(match);
@@ -333,7 +336,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
                     return;
                 }
                 int playerToKill = data.getIntExtra("position", -1);
-                Toast.makeText(getApplicationContext(), "Vous avez voté contre : " + state.getPlayerName(playerToKill), Toast.LENGTH_LONG).show();
+                Toast.makeText(getApplicationContext(), R.string.vote_against + state.getPlayerName(playerToKill), Toast.LENGTH_LONG).show();
                 state.voteToKillPlayer(playerToKill);
                 state.getNextPlayerTurn();
                 takeTurn(match);
@@ -343,15 +346,13 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
                     return;
                 }
                 int playerToSave = data.getIntExtra("position", -1);
-                //String selectedAnimal = playerNameList.get(position);
-                //Toast.makeText(getApplicationContext(), "Vous avez voté contre : " + selectedAnimal, Toast.LENGTH_LONG).show();
                 if(playerToSave != -1) {
-                    Toast.makeText(getApplicationContext(), "Vous avez sauvé le joueur", Toast.LENGTH_LONG).show();
+                    Toast.makeText(getApplicationContext(), R.string.save_player, Toast.LENGTH_LONG).show();
                     state.killPlayer(playerToSave);
                 }
                 else
                 {
-                    Toast.makeText(getApplicationContext(), "Vous avez laissé le groupe tuer " + state.getPlayerName(playerToSave), Toast.LENGTH_LONG).show();
+                    Toast.makeText(getApplicationContext(), R.string.let_kill + state.getPlayerName(playerToSave), Toast.LENGTH_LONG).show();
                 }
                 state.getNextPlayerTurn();
                 takeTurn(match);
@@ -370,7 +371,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
                     return;
                 }
                 int positionToSee = data.getIntExtra("position", -1);
-                Toast.makeText(getApplicationContext(), "Ce joueur est un " + state.getPlayerType(positionToSee), Toast.LENGTH_LONG).show();
+                Toast.makeText(getApplicationContext(),  R.string.player_is + state.getPlayerType(positionToSee), Toast.LENGTH_LONG).show();
                 takeTurn(match);
 
 
@@ -505,6 +506,33 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
     {
         //TODO Update turn
         /** SHOW WHAT HAPPENS LAST TURN HERE **/
+        ListView alive = (ListView) findViewById(R.id.listViewPlayersAlive);
+        ListView died = (ListView) findViewById(R.id.listViewPlayersDied);
+        ArrayList<String> playerAliveList = new ArrayList<String>();
+        ArrayList<String> playerDeadList = new ArrayList<String>();
+        for(Player p : state.getPlayers())
+        {
+            if(p.isAlive())
+            {
+                playerAliveList.add(p.getParticipantId());
+            }
+            else
+            {
+                playerDeadList.add(p.getParticipantId()+ " : " + p.getTypeName());
+            }
+        }
+        ArrayAdapter<String> arrayAdapter = new ArrayAdapter<String>(this,android.R.layout.simple_list_item_1, playerAliveList);
+        alive.setAdapter(arrayAdapter);
+        ArrayAdapter<String> arrayAdapter2 = new ArrayAdapter<String>(this,android.R.layout.simple_list_item_2, playerDeadList);
+        alive.setAdapter(arrayAdapter);
+        TextView myClass = (TextView) findViewById(R.id.myOwnClass);
+        myClass.setText(state.getPlayerType(playerId));
+        TextView isAlive = (TextView) findViewById(R.id.amIAlive);
+        if(state.isPlayerAlive(playerId))
+            myClass.setText(R.string.alive);
+        else
+            myClass.setText(R.string.dead);
+
         /** END SHOW WHAT HAPPENS LAST TURN HERE **/
     }
 
