@@ -22,52 +22,34 @@ import java.util.ArrayList;
 public class VotingActivity extends AppCompatActivity{
 
     private GameState state;
+    public VotingActivity(GameState state)
+    {
+        this.state = state;
+    }
+
     ArrayList<String> playerNameList;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_voting);
-
 //fill the listView
         ListView alive = (ListView) findViewById(R.id.listViewPlayersAlive);
-
         playerNameList = new ArrayList<String>();
-
-        byte [] serializedGameState = this.getIntent().getExtras().getByteArray("GameState");
-
-        try
+        for(Player p : state.getPlayers())
         {
-            state.unserialize(serializedGameState);
-            for(Player p : state.getPlayers())
-            {
-                if(p.isAlive())
-                    playerNameList.add(p.getParticipantId());
+            if(p.isAlive())
+                playerNameList.add(p.getParticipantId());
+        }
+        ArrayAdapter<String> arrayAdapter = new ArrayAdapter<String>(this,android.R.layout.simple_list_item_1, playerNameList);
+        alive.setAdapter(arrayAdapter);
+        alive.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            // argument position gives the index of item which is clicked
+            public void onItemClick(AdapterView<?> arg0, View v, int position, long arg3) {
+                Intent intent = new Intent();
+                intent.putExtra("position",position);
+                setResult(RESULT_OK, intent);
+                finish();
             }
-            ArrayAdapter<String> arrayAdapter = new ArrayAdapter<String>(this,android.R.layout.simple_list_item_1, playerNameList);
-
-            alive.setAdapter(arrayAdapter);
-
-            alive.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-                // argument position gives the index of item which is clicked
-                public void onItemClick(AdapterView<?> arg0, View v, int position, long arg3) {
-
-                //set the vote and change activity to wait other player
-                    String selectedAnimal = playerNameList.get(position);
-                    state.voteToKillPlayer(position);
-                    state.getNextPlayerTurn();
-                    Toast.makeText(getApplicationContext(), "Vous avez voté contre : " + selectedAnimal, Toast.LENGTH_LONG).show();
-                    Intent intent = new Intent(VotingActivity.this, WaitingVotersLobby.class);
-                    intent.putExtra("voter", selectedAnimal);
-                    startActivity(intent);
-                }
-            });
-        }
-        catch (JSONException e)
-        {
-            e.printStackTrace();
-        }
-
-
-
+        });
     }
 }

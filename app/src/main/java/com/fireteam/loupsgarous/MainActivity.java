@@ -51,6 +51,8 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
     private View mContentView;
     private GameState state;
     private String participantId;
+    private int playerId;
+    private TurnBasedMatch match;
 
     private int CURRENT_PLAYERS = 6, NB_MAX_PLAYERS = 30, NB_MIN_PLAYERS = 2;
 
@@ -271,6 +273,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
 
     private static final int RC_SIGN_IN = 9001;
     private static final int RC_SELECT_PLAYERS = 9002;
+    private static final int PLAYER_VOTE = 9003;
 
     @Override
     protected void onActivityResult(int request, int result, Intent data) {
@@ -309,6 +312,17 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
                             }
                         });
                 break;
+            case PLAYER_VOTE:
+                if (result != RESULT_OK) {
+                    return;
+                }
+                int position = data.getIntExtra("position", -1);
+                //String selectedAnimal = playerNameList.get(position);
+                state.voteToKillPlayer(position);
+                state.getNextPlayerTurn();
+                //Toast.makeText(getApplicationContext(), "Vous avez voté contre : " + selectedAnimal, Toast.LENGTH_LONG).show();
+                takeTurn(match);
+                break;
         }
     }
 
@@ -316,7 +330,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
     public void initGame(TurnBasedMatch match)
     {
         state.init(CURRENT_PLAYERS);
-        state.addPlayer(match.getParticipantId(participantId));
+        playerId = state.addPlayer(match.getParticipantId(participantId));
         try{
 
             byte [] serializedData = state.serialize();
@@ -335,28 +349,30 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
 
     }
 
-    public void playGame(TurnBasedMatch match)
-    {
-        try {
-            state.unserialize(match.getData());
-        }
-        catch(JSONException e){
-            e.printStackTrace();
-        }
+    public void playGame(TurnBasedMatch match) {
 
         // TODO Actions !!
         /** DO ACTIONS HERE **/
 
-        switch(state.getTurnType())
-        {
+        switch (state.getTurnType()) {
             case WAITING_PLAYERS:
                 state.addPlayer(match.getParticipantId(participantId));
+                takeTurn(match);
                 break;
+            case NIGHT:
+                this.match = match;
+                Intent voteIntent = new Intent(new VotingActivity(state), null);
+                startActivityForResult(voteIntent, PLAYER_VOTE);
+                break;
+
 
         }
 
         /** END ACTIONS HERE **/
+    }
 
+    public void takeTurn(TurnBasedMatch match)
+    {
         try {
             byte[] serializedData = state.serialize();
             Games.TurnBasedMultiplayer.takeTurn(mGoogleApiClient, match.getMatchId(), serializedData, state.getNextPlayerTurn()).setResultCallback(
@@ -393,15 +409,30 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
         playGame(match);
     }
 
+    public void updateGame(TurnBasedMatch match)
+    {
+        //TODO Update turn
+        /** SHOW WHAT HAPPENS LAST TURN HERE **/
+        /** END SHOW WHAT HAPPENS LAST TURN HERE **/
+    }
 
 
     public void processResult(TurnBasedMultiplayer.UpdateMatchResult result) {
+
         Status status = result.getStatus();
         if (!status.isSuccess()) {
             //showError(status.getStatusCode());
             return;
         }
         TurnBasedMatch match = result.getMatch();
+
+
+        try {
+            state.unserialize(match.getData());
+        }
+        catch(JSONException e){
+            e.printStackTrace();
+        }
         /*
         if (match.canRematch()) {
             askForRematch();
@@ -412,7 +443,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
         if (match.getData() != null) {
             Toast.makeText(this, "Data: " + match.getData().toString(), Toast.LENGTH_LONG).show();
         }
-
+        updateGame(match);
         if (isDoingTurn) {
             playGame(match);
             return;
