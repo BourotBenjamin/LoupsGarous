@@ -1,5 +1,6 @@
 package com.fireteam.loupsgarous;
 
+import android.util.Log;
 import android.widget.Toast;
 
 import com.fireteam.loupsgarous.player.KillState;
@@ -145,7 +146,7 @@ public class GameState {
     {
         Random rand = new Random();
         PlayerType type;
-        int playerId = currentPlayers++;
+        int playerId = currentPlayers;
         Player p = new Player(playerId, participantId);
         players[playerId] = p;
         if(currentPlayers == nbPlayers)
@@ -189,6 +190,7 @@ public class GameState {
                 turnType = TurnType.INIT_GAME_THIEF;
             }
         }
+        ++currentPlayers;
         return playerId;
     }
 
@@ -197,9 +199,18 @@ public class GameState {
         state.put(0, nbPlayers);
         state.put(1, currentPlayers);
         state.put(2, leader);
-        state.put(3, middleCards[0]);
-        state.put(4, middleCards[1]);
-        state.put(5, turnType);
+        if( middleCards[0] == null)
+            state.put(3, -1);
+        else
+            state.put(3, middleCards[0].getValue());
+        if( middleCards[1] == null)
+            state.put(4, -1);
+        else
+            state.put(4, middleCards[1].getValue());
+        if( turnType == null)
+            state.put(5, -1);
+        else
+            state.put(5, turnType.getValue());
         state.put(6, lastPlayedIdPlayer);
         state.put(7, launchKillPlayer);
         state.put(8, launchSetLeader);
@@ -218,13 +229,23 @@ public class GameState {
     }
 
     public GameState unserialize(byte[] data) throws JSONException {
+        Log.i("Serialize0", "Unserialize");
         JSONArray state = new JSONArray(new String(data));
         nbPlayers = state.getInt(0);
         currentPlayers = state.getInt(1);
         leader = state.getInt(2);
-        middleCards[0] = PlayerType.values()[state.getInt(3)];
-        middleCards[1] = PlayerType.values()[state.getInt(4)];
-        turnType = TurnType.values()[state.getInt(5)];
+        if(state.getInt(3) == -1)
+            middleCards[0] = null;
+        else
+            middleCards[0] = PlayerType.values()[state.getInt(3)];
+        if(state.getInt(4) == -1)
+            middleCards[1] = null;
+        else
+            middleCards[1] = PlayerType.values()[state.getInt(4)];
+        if(state.getInt(5) == -1)
+            turnType = null;
+        else
+            turnType = TurnType.values()[state.getInt(5)];
         lastPlayedIdPlayer = state.getInt(6);
         launchKillPlayer = state.getBoolean(7);
         launchSetLeader = state.getBoolean(8);
@@ -233,9 +254,14 @@ public class GameState {
         {
             votes[index] = state.getInt(index + 9);
         }
+        Log.i("Serialize0", "Unserialize players");
         int nextIndex = nbPlayers + 9, playerSize = 0;
-        for(index = 0; index < nbPlayers; index++)
+        for(index = 0; index < currentPlayers; index++)
         {
+            if(players[index] == null) {
+                players[index] = new Player();
+                Log.i("Serialize0", "Create player "+index);
+            }
             playerSize = players[index].unserialize(state, nextIndex);
             nextIndex += playerSize;
         }
@@ -244,6 +270,34 @@ public class GameState {
         if(launchSetLeader)
             setLeader(-1);
         return this;
+    }
+
+    public String getPlayersToString()
+    {
+        String s = new String("");
+        for(int index = 0; index < currentPlayers; index++)
+        {
+            if( players[index] != null)
+                s += "    Player " + index + " : " + players[index].toString();
+            else
+                s += "    Player " + index + " is empty !! ";
+        }
+        return s;
+    }
+
+    public String toString() {
+        return new String("Games Data : \n" +
+                nbPlayers + " players MAX \n" +
+                currentPlayers + " players \n" +
+                "Leader : " + leader + "\n" +
+                "middle 1 " + middleCards[0] + "\n"+
+                "middle 2 " + middleCards[1] + "\n"+
+                "Last player " + lastPlayedIdPlayer + "\n" +
+                "Kill " + launchKillPlayer + "\n" +
+                "Elect " + launchSetLeader + "\n" +
+                "Players :  " + players.length + "\n" +
+                getPlayersToString()
+        );
     }
 
     public void voteToKillPlayer(int playerId)

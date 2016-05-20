@@ -13,9 +13,16 @@ public class Player {
     boolean leader;
     String participantId;
 
+    public String toString()
+    {
+        return new String(" type : " + type + " Alive : " + alive + " Lover : " + loverId + " Leader : " + leader + " Name : " + participantId + "\n");
+    }
+
     public int getPlayerId() {
         return playerId;
     }
+
+    public  Player() {}
 
     public Player(int playerId, String participantId)
     {
@@ -78,7 +85,10 @@ public class Player {
         state.put(nextIndex, playerId);
         state.put(nextIndex + 1, alive);
         state.put(nextIndex + 2, leader);
-        state.put(nextIndex + 3, type);
+        if(type == null)
+            state.put(nextIndex + 3, -1);
+        else
+            state.put(nextIndex + 3, type.getValue());
         state.put(nextIndex + 4, loverId);
         state.put(nextIndex + 5, participantId);
         return 6;
@@ -88,7 +98,10 @@ public class Player {
         playerId = state.getInt(nextIndex);
         alive = state.getBoolean(nextIndex + 1);
         leader = state.getBoolean(nextIndex + 2);
-        type = (PlayerType) state.get(nextIndex + 3);
+        if(state.getInt(nextIndex + 3) == -1)
+            type = null;
+        else
+            type = PlayerType.values()[state.getInt(nextIndex + 3)];
         loverId = state.getInt(nextIndex + 4);
         participantId = state.getString(nextIndex + 5);
         return 6;
