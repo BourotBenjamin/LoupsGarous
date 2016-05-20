@@ -362,9 +362,44 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
             case NIGHT:
                 this.match = match;
                 Intent voteIntent = new Intent(new VotingActivity(state), null);
-                startActivityForResult(voteIntent, PLAYER_VOTE);
+                startActivityForResult(voteIntent, PLAYER_VOTE_TO_KILL);
                 break;
 
+            case DAY:
+                this.match = match;
+                Intent voteIntentDay = new Intent(new VotingActivity(state), null);
+                startActivityForResult(voteIntentDay, PLAYER_VOTE_TO_KILL);
+                break;
+
+            case WITCH_TURN:
+                this.match = match;
+                Intent voteForSaving = new Intent(new VotingActivityWich(state, state.getPlayerToKill()), null);
+                startActivityForResult(voteForSaving, PLAYER_VOTE_TO_SAVE);
+                break;
+
+            case SEER_TURN:
+                this.match = match;
+                Intent voteForSeeing = new Intent(new VotingActivity(state), null);
+                startActivityForResult(voteForSeeing, PLAYER_VOTE_TO_SEE);
+                break;
+
+            case VOTE_FOR_LEADER:
+                this.match = match;
+                Intent voteForLeader = new Intent(new VotingActivity(state), null);
+                startActivityForResult(voteForLeader, PLAYER_VOTE_TO_ELECT);
+                break;
+
+            /*case INIT_GAME_THIEF:
+                this.match = match;
+                Intent voteForLeader = new Intent(new VotingActivity(state), null);
+                startActivityForResult(voteForLeader, PLAYER_VOTE_TO_ELECT);
+                break;*/
+
+            case INIT_GAME_CUPIDON:
+                this.match = match;
+                Intent voteForLovers = new Intent(new SelectLovers(state), null);
+                startActivityForResult(voteForLovers, PLAYER_VOTE_TO_LOVE);
+                break;
 
         }
 
