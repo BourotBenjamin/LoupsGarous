@@ -1,20 +1,36 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:orientation="vertical" android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:orientation="vertical"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:background="#dea62d"
+    android:layout_centerInParent="true">
 
-    <TextView
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:text="Qui voulez vous tuer?"
-        android:textSize="30sp"/>
+    <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+        android:orientation="vertical"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:background="@drawable/rect_round_corner"
+        android:layout_centerInParent="true">
+
+        <TextView
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:text="Qui voulez vous tuer?"
+            android:textColor="#dea62d"
+            android:textStyle="bold"
+            android:textSize="35dp"
+            android:gravity="center"
+            android:padding="25dp"/>
+
+    </LinearLayout>
 
     <ListView
         android:id="@+id/listViewPlayersAlive"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:dividerHeight="0.1dp"
-        android:divider="#0000CC">
-    </ListView>
+        android:dividerHeight="0.8dp"
+        android:divider="#0000CC"
+        android:textStyle="bold"/>
 
 </LinearLayout>
