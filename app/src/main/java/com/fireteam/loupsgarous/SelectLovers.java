@@ -38,7 +38,7 @@ public class SelectLovers extends AppCompatActivity {
         playerNameList = new ArrayList<String>();
         for(Player p : state.getPlayers())
         {
-            playerNameList.add(p.getParticipantId());
+            playerNameList.add(p.getDisplayName());
         }
         ArrayAdapter<String> arrayAdapter = new ArrayAdapter<String>(this,android.R.layout.simple_list_item_1, playerNameList);
         alive.setAdapter(arrayAdapter);

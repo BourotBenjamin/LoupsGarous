@@ -28,7 +28,7 @@ public class VotingActivityWich extends AppCompatActivity {
         setContentView(R.layout.activity_witch);
 
         TextView tv = (TextView) findViewById(R.id.playerToKill);
-        tv.setText(playertoKill.getParticipantId());
+        tv.setText(playertoKill.getDisplayName());
 
 
 

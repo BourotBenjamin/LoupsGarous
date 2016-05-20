@@ -12,6 +12,7 @@ public class Player {
     int loverId;
     boolean leader;
     String participantId;
+    String displayName;
 
     public String toString()
     {
@@ -24,11 +25,16 @@ public class Player {
 
     public  Player() {}
 
-    public Player(int playerId, String participantId)
+    public String getDisplayName() {
+        return displayName;
+    }
+
+    public Player(int playerId, String participantId, String displayName)
     {
         this.playerId = playerId;
         this.alive = true;
         this.participantId = participantId;
+        this.displayName = displayName;
         this.loverId = -1;
     }
 
@@ -91,7 +97,8 @@ public class Player {
             state.put(nextIndex + 3, type.getValue());
         state.put(nextIndex + 4, loverId);
         state.put(nextIndex + 5, participantId);
-        return 6;
+        state.put(nextIndex + 6, displayName);
+        return 7;
     }
 
     public int unserialize(JSONArray state, int nextIndex) throws JSONException {
@@ -104,7 +111,8 @@ public class Player {
             type = PlayerType.values()[state.getInt(nextIndex + 3)];
         loverId = state.getInt(nextIndex + 4);
         participantId = state.getString(nextIndex + 5);
-        return 6;
+        displayName = state.getString(nextIndex + 6);
+        return 7;
     }
 
     public String getParticipantId() {

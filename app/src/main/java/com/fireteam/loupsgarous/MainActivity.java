@@ -60,6 +60,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
     private View mContentView;
     private GameState state;
     private String participantId;
+    private String displayName;
     private int playerId = -1;
     private TurnBasedMatch match;
 
@@ -224,6 +225,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
     @Override
     public void onConnected(Bundle connectionHint) {
         participantId = Games.Players.getCurrentPlayer(mGoogleApiClient).getPlayerId();
+        displayName = Games.Players.getCurrentPlayer(mGoogleApiClient).getDisplayName();
         Intent intent = Games.TurnBasedMultiplayer.getSelectOpponentsIntent(mGoogleApiClient, NB_MIN_PLAYERS, NB_MAX_PLAYERS, true);
         startActivityForResult(intent, RC_SELECT_PLAYERS);
         Games.TurnBasedMultiplayer.registerMatchUpdateListener(mGoogleApiClient, this);
@@ -389,7 +391,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
     public void initGame()
     {
         state.init(CURRENT_PLAYERS);
-        playerId = state.addPlayer(participantId);
+        playerId = state.addPlayer(participantId, displayName);
         try{
 
             byte [] serializedData = state.serialize();
@@ -416,14 +418,14 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
         if(state.getTurnType() == null)
         {
             if(playerId == -1)
-                playerId = state.addPlayer(participantId);
+                playerId = state.addPlayer(participantId, displayName);
             takeTurn();
         }
         else
             switch (state.getTurnType()) {
                 case WAITING_PLAYERS:
                     if(playerId == -1)
-                        playerId = state.addPlayer(participantId);
+                        playerId = state.addPlayer(participantId, displayName);
                     takeTurn();
                     break;
                 case NIGHT:
@@ -524,9 +526,9 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
         {
             if(p != null) {
                 if (p.isAlive()) {
-                    playerAliveList.add(p.getParticipantId());
+                    playerAliveList.add(p.getDisplayName());
                 } else {
-                    playerDeadList.add(p.getParticipantId() + " : " + p.getTypeName());
+                    playerDeadList.add(p.getDisplayName() + " : " + p.getTypeName());
                 }
             }
         }

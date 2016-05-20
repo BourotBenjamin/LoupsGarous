@@ -38,7 +38,7 @@ public class GameState {
 
     public String getPlayerName(int playerId)
     {
-        return players[playerId].getParticipantId();
+        return players[playerId].getDisplayName();
     }
 
     public String getLeaderParticipantId()
@@ -142,12 +142,12 @@ public class GameState {
         launchKillPlayer = false;
     }
 
-    public int addPlayer(String participantId)
+    public int addPlayer(String participantId, String displayName)
     {
         Random rand = new Random();
         PlayerType type;
         int playerId = currentPlayers;
-        Player p = new Player(playerId, participantId);
+        Player p = new Player(playerId, participantId, displayName);
         players[playerId] = p;
         if(currentPlayers == nbPlayers)
         {
@@ -343,9 +343,9 @@ public class GameState {
             playerToKill = players[playerIdToKill];
         if(playerToKill != null && playerToKill.isAlive()) {
             playerToKill.kill();
-            Toast.makeText(mainActivity.getApplicationContext(), playerToKill.getParticipantId()+ mainActivity.getResources().getString(R.string.died) + playerToKill.getTypeName(), Toast.LENGTH_LONG).show();
+            Toast.makeText(mainActivity.getApplicationContext(), playerToKill.getDisplayName()+ mainActivity.getResources().getString(R.string.died) + playerToKill.getTypeName(), Toast.LENGTH_LONG).show();
             if (playerToKill.getLoverId() != -1) {
-                Toast.makeText(mainActivity.getApplicationContext(), mainActivity.getResources().getString(R.string.lover) + players[playerToKill.getLoverId()].getParticipantId()+ mainActivity.getResources().getString(R.string.was) + playerToKill.getTypeName(), Toast.LENGTH_LONG).show();
+                Toast.makeText(mainActivity.getApplicationContext(), mainActivity.getResources().getString(R.string.lover) + players[playerToKill.getLoverId()].getDisplayName()+ mainActivity.getResources().getString(R.string.was) + playerToKill.getTypeName(), Toast.LENGTH_LONG).show();
                 players[playerToKill.getLoverId()].kill();
                 if(playerToKill.getType() == PlayerType.HUNTER) {
                     if (players[playerToKill.getLoverId()].isLeader() || playerToKill.isLeader())
@@ -407,7 +407,7 @@ public class GameState {
         if(playerIdToSetLeader == - 1)
             playerIdToSetLeader = getPlayerIdToSetLeader();
         players[playerIdToSetLeader].setLeader();
-        Toast.makeText(mainActivity.getApplicationContext(), players[playerIdToSetLeader].getParticipantId()+  mainActivity.getResources().getString(R.string.new_leader), Toast.LENGTH_LONG).show();
+        Toast.makeText(mainActivity.getApplicationContext(), players[playerIdToSetLeader].getDisplayName()+  mainActivity.getResources().getString(R.string.new_leader), Toast.LENGTH_LONG).show();
         leader = playerIdToSetLeader;
     }
 
