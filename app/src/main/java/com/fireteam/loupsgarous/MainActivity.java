@@ -467,11 +467,6 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
         try {
             byte[] serializedData = state.serialize();
             String nextPlayerToPlay = state.getNextPlayerTurn();
-            if(nextPlayerToPlay == null)
-            {
-                nextPlayerToPlay = state.getNextPlayerTurn();
-                //TODO What to do if player is null (END OF NIGHT / DAY /
-            }
             Games.TurnBasedMultiplayer.takeTurn(mGoogleApiClient, match.getMatchId(), serializedData, nextPlayerToPlay).setResultCallback(
                     new ResultCallback<TurnBasedMultiplayer.UpdateMatchResult>() {
                         @Override

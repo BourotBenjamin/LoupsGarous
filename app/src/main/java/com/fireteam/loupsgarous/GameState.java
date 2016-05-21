@@ -75,14 +75,14 @@ public class GameState {
                     for (int i = 0; i < nbPlayers; i++)
                         if(players[i].getType() == PlayerType.THIEF)
                             return players[i].getParticipantId();
-                    break;
+                   return getNextPlayerTurn();
                 case INIT_GAME_CUPIDON:
                     lastPlayedIdPlayer = -1;
                     turnType = TurnType.VOTE_FOR_LEADER;
                     for (int i = 0; i < nbPlayers; i++)
                         if(players[i].getType() == PlayerType.CUPIDON)
                             return players[i].getParticipantId();
-                    break;
+                    return getNextPlayerTurn();
                 case VOTE_FOR_LEADER:
                     ++lastPlayedIdPlayer;
                     if(lastPlayedIdPlayer < nbPlayers)
@@ -90,15 +90,15 @@ public class GameState {
                     else {
                         turnType = TurnType.SEER_TURN;
                         launchSetLeader = true;
+                        return getNextPlayerTurn();
                     }
-                    break;
                 case SEER_TURN:
                     lastPlayedIdPlayer = -1;
                     turnType = TurnType.NIGHT;
                     for (int i = 0; i < nbPlayers; i++)
                         if(players[i].isAlive() && players[i].getType() == PlayerType.SEER)
                             return players[i].getParticipantId();
-                    break;
+                    return getNextPlayerTurn();
                 case NIGHT:
                     while(lastPlayedIdPlayer < nbPlayers) {
                         ++lastPlayedIdPlayer;
@@ -106,7 +106,7 @@ public class GameState {
                             return players[lastPlayedIdPlayer].getParticipantId();
                     }
                     turnType = TurnType.WITCH_TURN;
-                    break;
+                    return getNextPlayerTurn();
                 case WITCH_TURN:
                     lastPlayedIdPlayer = -1;
                     turnType = TurnType.DAY;
@@ -114,7 +114,7 @@ public class GameState {
                         if(players[i].isAlive() && players[i].getType() == PlayerType.WITCH)
                             return players[i].getParticipantId();
                     launchKillPlayer = true;
-                    break;
+                    return getNextPlayerTurn();
                 case DAY:
                     while(lastPlayedIdPlayer < nbPlayers) {
                         ++lastPlayedIdPlayer;
@@ -123,8 +123,7 @@ public class GameState {
                     }
                     launchKillPlayer = true;
                     turnType = TurnType.SEER_TURN;
-                    break;
-
+                    return getNextPlayerTurn();
             }
         }
         return null;
