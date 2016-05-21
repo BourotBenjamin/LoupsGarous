@@ -63,6 +63,21 @@ public class GameState {
         return turnType;
     }
 
+    public String getNextPlayerByType(PlayerType type, TurnType nextType, boolean killPlayer)
+    {
+        while(lastPlayedIdPlayer < nbPlayers - 1) {
+            ++lastPlayedIdPlayer;
+            if (players[lastPlayedIdPlayer].isAlive() && players[lastPlayedIdPlayer].getType() == type)
+                return players[lastPlayedIdPlayer].getParticipantId();
+        }
+        lastPlayedIdPlayer = -1;
+        turnType = nextType;
+        if(!killPlayer)
+            return getNextPlayerTurn();
+        launchKillPlayer = true;
+        return null;
+    }
+
     public String getNextPlayerTurn()
     {
         Log.i("TURNS", "getNextPlayerTurn");
@@ -75,19 +90,9 @@ public class GameState {
                     turnType = TurnType.INIT_GAME_CUPIDON;
                     return getNextPlayerTurn();
                 case INIT_GAME_THIEF:
-                    lastPlayedIdPlayer = -1;
-                    turnType = TurnType.INIT_GAME_CUPIDON;
-                    for (int i = 0; i < nbPlayers; i++)
-                        if(players[i].getType() == PlayerType.THIEF)
-                            return players[i].getParticipantId();
-                   return getNextPlayerTurn();
+                    return getNextPlayerByType(PlayerType.THIEF, TurnType.INIT_GAME_CUPIDON, false);
                 case INIT_GAME_CUPIDON:
-                    lastPlayedIdPlayer = -1;
-                    turnType = TurnType.VOTE_FOR_LEADER;
-                    for (int i = 0; i < nbPlayers; i++)
-                        if(players[i].getType() == PlayerType.CUPIDON)
-                            return players[i].getParticipantId();
-                    return getNextPlayerTurn();
+                    return getNextPlayerByType(PlayerType.CUPIDON, TurnType.VOTE_FOR_LEADER, false);
                 case VOTE_FOR_LEADER:
                     ++lastPlayedIdPlayer;
                     if(lastPlayedIdPlayer < nbPlayers)
@@ -95,31 +100,14 @@ public class GameState {
                     else {
                         turnType = TurnType.SEER_TURN;
                         launchSetLeader = true;
-                        return getNextPlayerTurn();
                     }
+                    break;
                 case SEER_TURN:
-                    lastPlayedIdPlayer = -1;
-                    turnType = TurnType.NIGHT;
-                    for (int i = 0; i < nbPlayers; i++)
-                        if(players[i].isAlive() && players[i].getType() == PlayerType.SEER)
-                            return players[i].getParticipantId();
-                    return getNextPlayerTurn();
+                    return getNextPlayerByType(PlayerType.SEER, TurnType.NIGHT, true);
                 case NIGHT:
-                    while(lastPlayedIdPlayer < nbPlayers - 1) {
-                        ++lastPlayedIdPlayer;
-                        if (players[lastPlayedIdPlayer].isAlive() && players[lastPlayedIdPlayer].getType() == PlayerType.WEREWOLF)
-                            return players[lastPlayedIdPlayer].getParticipantId();
-                    }
-                    turnType = TurnType.WITCH_TURN;
-                    return getNextPlayerTurn();
+                    return getNextPlayerByType(PlayerType.WEREWOLF, TurnType.WITCH_TURN, false);
                 case WITCH_TURN:
-                    lastPlayedIdPlayer = -1;
-                    turnType = TurnType.DAY;
-                    for (int i = 0; i < nbPlayers; i++)
-                        if(players[i].isAlive() && players[i].getType() == PlayerType.WITCH)
-                            return players[i].getParticipantId();
-                    launchKillPlayer = true;
-                    return getNextPlayerTurn();
+                    return getNextPlayerByType(PlayerType.WITCH, TurnType.DAY, true);
                 case DAY:
                     while(lastPlayedIdPlayer < nbPlayers - 1) {
                         ++lastPlayedIdPlayer;
@@ -128,7 +116,7 @@ public class GameState {
                     }
                     launchKillPlayer = true;
                     turnType = TurnType.SEER_TURN;
-                    return getNextPlayerTurn();
+                    break;
             }
         }
         Log.i("TURNS", " Return null : " + turnType);
@@ -161,26 +149,26 @@ public class GameState {
             boolean witch = false, cupidon = false, thief = false, hunter = false, seer = false;
             for(int i = 0; i < nbPlayers + 2; i++)
             {
-                if(rand.nextFloat() % 2.0 >= 1) {
+                if(rand.nextInt() % 2 > 0) {
                     type = PlayerType.WEREWOLF;
                 }
-                else if(!witch && rand.nextFloat() % 2.0 >= 1) {
+                else if(!witch && rand.nextInt() % 2 > 0) {
                     type = PlayerType.WITCH;
                     witch = true;
                 }
-                else if(!cupidon && rand.nextFloat() % 2.0 >= 1) {
+                else if(!cupidon && rand.nextInt() % 2 > 0) {
                     type = PlayerType.CUPIDON;
                     cupidon = true;
                 }
-                else if(!thief && rand.nextFloat() % 2.0 >= 1) {
+                else if(!thief && rand.nextInt() % 2 > 0) {
                     type = PlayerType.THIEF;
                     thief = true;
                 }
-                else if(!hunter && rand.nextFloat() % 2.0 >= 1) {
+                else if(!hunter && rand.nextInt() % 2 > 0) {
                     type = PlayerType.HUNTER;
                     hunter = true;
                 }
-                else if(!seer && rand.nextFloat() % 2.0 >= 1) {
+                else if(!seer && rand.nextInt() % 2 > 0) {
                     type = PlayerType.SEER;
                     seer = true;
                 }
@@ -286,11 +274,16 @@ public class GameState {
             playerSize = players[index].unserialize(state, nextIndex);
             nextIndex += playerSize;
         }
+        return this;
+    }
+
+    public void executeNextTurnActions()
+    {
+        Log.i("GAME", "Kill : " + launchKillPlayer + " Leader : " + launchSetLeader);
         if(launchKillPlayer)
             killPlayer(-1);
         if(launchSetLeader)
             setLeader(-1);
-        return this;
     }
 
     public String getPlayersToString()
@@ -337,8 +330,9 @@ public class GameState {
         boolean ok = true;
         for(int i = 0; i < nbPlayers; i++)
         {
-            if(ok && votes[i] > bestScore)
+            if(votes[i] > bestScore)
             {
+                ok = true;
                 best = i;
                 bestScore = votes[i];
             }
@@ -365,8 +359,10 @@ public class GameState {
         if(playerToKill != null && playerToKill.isAlive()) {
             playerToKill.kill();
             Toast.makeText(mainActivity.getApplicationContext(), playerToKill.getDisplayName()+ mainActivity.getResources().getString(R.string.died) + playerToKill.getTypeName(), Toast.LENGTH_LONG).show();
+            Log.i("GAME", playerToKill.getDisplayName()+ mainActivity.getResources().getString(R.string.died) + playerToKill.getTypeName());
             if (playerToKill.getLoverId() != -1) {
                 Toast.makeText(mainActivity.getApplicationContext(), mainActivity.getResources().getString(R.string.lover) + players[playerToKill.getLoverId()].getDisplayName()+ mainActivity.getResources().getString(R.string.was) + playerToKill.getTypeName(), Toast.LENGTH_LONG).show();
+                Log.i("GAME", mainActivity.getResources().getString(R.string.lover) + players[playerToKill.getLoverId()].getDisplayName()+ mainActivity.getResources().getString(R.string.was) + playerToKill.getTypeName());
                 players[playerToKill.getLoverId()].kill();
                 if(playerToKill.getType() == PlayerType.HUNTER) {
                     if (players[playerToKill.getLoverId()].isLeader() || playerToKill.isLeader())

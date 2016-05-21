@@ -32,7 +32,7 @@ public class VotingActivityWich extends AppCompatActivity {
     public void OnYesClicked(View v)
     {
         Intent intent = new Intent();
-        intent.putExtra("playerToKill", playerIdToKill);
+        intent.putExtra("playerToKill", -1);
         setResult(RESULT_OK, intent);
         finish();
     }
@@ -40,7 +40,7 @@ public class VotingActivityWich extends AppCompatActivity {
     public void OnNoClicked(View v)
     {
         Intent intent = new Intent();
-        intent.putExtra("playerToKill", -1);
+        intent.putExtra("playerToKill", playerIdToKill);
         setResult(RESULT_OK, intent);
         finish();
     }

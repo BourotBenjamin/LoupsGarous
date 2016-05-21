@@ -43,7 +43,7 @@
         android:textSize="35dp"
         android:layout_marginTop="50dp"
         android:layout_marginLeft="150dp"
-        android:onClick="onYesClicked"/>
+        android:onClick="OnYesClicked"/>
 
     <CheckBox
         android:layout_width="wrap_content"
@@ -53,6 +53,6 @@
         android:textSize="35dp"
         android:layout_marginTop="50dp"
         android:layout_marginLeft="150dp"
-        android:onClick="onNoClicked"/>
+        android:onClick="OnNoClicked"/>
 
 </LinearLayout>

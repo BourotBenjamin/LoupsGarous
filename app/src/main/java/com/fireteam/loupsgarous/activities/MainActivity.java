@@ -16,6 +16,7 @@ import android.widget.Toast;
 
 import com.fireteam.loupsgarous.GameState;
 import com.fireteam.loupsgarous.R;
+import com.fireteam.loupsgarous.TurnType;
 import com.fireteam.loupsgarous.player.Player;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
@@ -439,10 +440,16 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
                     startActivityForResult(voteIntentDay, PLAYER_VOTE_TO_KILL);
                     break;
                 case WITCH_TURN:
-                    Intent voteForSaving = new Intent(this, VotingActivityWich.class);
-                    voteForSaving.putExtra("playerToKill", state.getPlayerToKill().getDisplayName());
-                    voteForSaving.putExtra("playerIdToKill", state.getPlayerToKill().getPlayerId());
-                    startActivityForResult(voteForSaving, PLAYER_VOTE_TO_SAVE);
+                    Player playerToKill = state.getPlayerToKill();
+                    if(playerToKill == null) {
+                        takeTurn();
+                    }
+                    else {
+                        Intent voteForSaving = new Intent(this, VotingActivityWich.class);
+                        voteForSaving.putExtra("playerToKill", playerToKill.getDisplayName());
+                        voteForSaving.putExtra("playerIdToKill", playerToKill.getPlayerId());
+                        startActivityForResult(voteForSaving, PLAYER_VOTE_TO_SAVE);
+                    }
                     break;
                 case SEER_TURN:
                     Intent voteForSeeing = new Intent(this, VotingActivity.class);
@@ -456,10 +463,11 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
                     voteForLeader.putExtra("title", "Choisissez un leader");
                     startActivityForResult(voteForLeader, PLAYER_VOTE_TO_ELECT);
                     break;
-                /*case INIT_GAME_THIEF:
-                    Intent voteForLeader = new Intent(new VotingActivity(state), null);
-                    startActivityForResult(voteForLeader, PLAYER_VOTE_TO_ELECT);
-                    break;*/
+                case INIT_GAME_THIEF:
+                    /*Intent voteForLeader = new Intent(new VotingActivity(state), null);
+                    startActivityForResult(voteForLeader, PLAYER_VOTE_TO_ELECT);*/
+                    takeTurn();
+                    break;
                 case INIT_GAME_CUPIDON:
                     Intent voteForLovers = new Intent(this, SelectLovers.class);
                     voteForLovers.putExtra("playersNames", state.getPlayersNames());
@@ -471,31 +479,48 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
         /** END ACTIONS HERE **/
     }
 
-    public void takeTurn()
+    public void nextPlayerTurn(String nextPlayerToPlay)
     {
         try {
-            String nextPlayerToPlay = state.getNextPlayerTurn();
-            if(nextPlayerToPlay != null && nextPlayerToPlay.length() > 5 )
-                nextPlayerToPlay = match.getParticipantId(nextPlayerToPlay);
-            if(nextPlayerToPlay == match.getParticipantId(googlePlayerId))
-                playOrUpdateTurn(match);
-            else {
-                byte[] serializedData = state.serialize();
-                Log.i("TURNS", "Next player : " + nextPlayerToPlay + " - " + match.getMatchId());
-                if(!mGoogleApiClient.isConnected())
-                    Log.e("API", "API Not connected !!");
-                Games.TurnBasedMultiplayer.takeTurn(mGoogleApiClient, match.getMatchId(), serializedData, nextPlayerToPlay).setResultCallback(
-                        new ResultCallback<TurnBasedMultiplayer.UpdateMatchResult>() {
-                            @Override
-                            public void onResult(TurnBasedMultiplayer.UpdateMatchResult result) {
-                                processResult(result);
-                            }
-                        });
-            }
+            byte[] serializedData = state.serialize();
+            Log.i("TURNS", "Next player : " + nextPlayerToPlay + " - " + match.getMatchId());
+            if(!mGoogleApiClient.isConnected())
+                Log.e("API", "API Not connected !!");
+            Games.TurnBasedMultiplayer.takeTurn(mGoogleApiClient, match.getMatchId(), serializedData, nextPlayerToPlay).setResultCallback(
+                    new ResultCallback<TurnBasedMultiplayer.UpdateMatchResult>() {
+                        @Override
+                        public void onResult(TurnBasedMultiplayer.UpdateMatchResult result) {
+                            processResult(result);
+                        }
+                    });
         }
         catch(JSONException e)
         {
             e.printStackTrace();
+        }
+    }
+
+    public void takeTurn()
+    {
+        String nextPlayerToPlay = state.getNextPlayerTurn();
+        if(nextPlayerToPlay == null)
+        {
+            state.executeNextTurnActions();
+            nextPlayerToPlay = state.getNextPlayerTurn();
+        }
+        while(state.getTurnType() != TurnType.WAITING_PLAYERS && nextPlayerToPlay == null)
+            nextPlayerToPlay = state.getNextPlayerTurn();
+        if(nextPlayerToPlay != null && nextPlayerToPlay.length() > 5 )
+            nextPlayerToPlay = match.getParticipantId(nextPlayerToPlay);
+        if(nextPlayerToPlay == match.getParticipantId(googlePlayerId)) {
+            if(state.isPlayerAlive(playerId)) {
+                playOrUpdateTurn(match, false);
+            }
+            else
+                nextPlayerTurn(state.getNextPlayerTurn());
+        }
+        else {
+            nextPlayerTurn(nextPlayerToPlay);
         }
     }
 
@@ -560,15 +585,16 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
         /** END SHOW WHAT HAPPENS LAST TURN HERE **/
     }
 
-    public void playOrUpdateTurn(TurnBasedMatch match)
+    public void playOrUpdateTurn(TurnBasedMatch match, boolean unserialize)
     {
         this.match = match;
-        try {
-            state.unserialize(match.getData());
-        }
-        catch(JSONException e){
-            Log.e("Serialize", "ERROR");
-            e.printStackTrace();
+        if(unserialize) {
+            try {
+                state.unserialize(match.getData());
+            } catch (JSONException e) {
+                Log.e("Serialize", "ERROR");
+                e.printStackTrace();
+            }
         }
         boolean isDoingTurn = (match.getTurnStatus() == TurnBasedMatch.MATCH_TURN_STATUS_MY_TURN);
         if (isDoingTurn) {
@@ -592,12 +618,12 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
             //showError(status.getStatusCode());
             return;
         }
-        playOrUpdateTurn(result.getMatch());
+        playOrUpdateTurn(result.getMatch(), true);
     }
 
     @Override
     public void onTurnBasedMatchReceived(TurnBasedMatch turnBasedMatch) {
-        playOrUpdateTurn(turnBasedMatch);
+        playOrUpdateTurn(turnBasedMatch, true);
     }
 
     @Override
