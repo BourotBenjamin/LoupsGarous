@@ -429,11 +429,13 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
                 case NIGHT:
                     Intent voteIntent = new Intent(this, VotingActivity.class);
                     voteIntent.putExtra("playersNames", state.getPlayersNames());
+                    voteIntent.putExtra("title", "Nuit : Choisissez qui tuer");
                     startActivityForResult(voteIntent, PLAYER_VOTE_TO_KILL);
                     break;
                 case DAY:
                     Intent voteIntentDay = new Intent(this, VotingActivity.class);
                     voteIntentDay.putExtra("playersNames", state.getPlayersNames());
+                    voteIntentDay.putExtra("title", "Jour : Choisissez qui tuer");
                     startActivityForResult(voteIntentDay, PLAYER_VOTE_TO_KILL);
                     break;
                 case WITCH_TURN:
@@ -445,11 +447,13 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
                 case SEER_TURN:
                     Intent voteForSeeing = new Intent(this, VotingActivity.class);
                     voteForSeeing.putExtra("playersNames", state.getPlayersNames());
+                    voteForSeeing.putExtra("title", "Voyante : Quelle carte voulez vous voir ?");
                     startActivityForResult(voteForSeeing, PLAYER_VOTE_TO_SEE);
                     break;
                 case VOTE_FOR_LEADER:
                     Intent voteForLeader = new Intent(this, VotingActivity.class);
                     voteForLeader.putExtra("playersNames", state.getPlayersNames());
+                    voteForLeader.putExtra("title", "Choisissez un leader");
                     startActivityForResult(voteForLeader, PLAYER_VOTE_TO_ELECT);
                     break;
                 /*case INIT_GAME_THIEF:
@@ -543,7 +547,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
             }
             ArrayAdapter<String> arrayAdapter = new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, playerAliveList);
             alive.setAdapter(arrayAdapter);
-            ArrayAdapter<String> arrayAdapter2 = new ArrayAdapter<String>(this, android.R.layout.simple_list_item_2, playerDeadList);
+            ArrayAdapter<String> arrayAdapter2 = new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, playerDeadList);
             died.setAdapter(arrayAdapter2);
             TextView myClass = (TextView) findViewById(R.id.myOwnClass);
             myClass.setText(state.getPlayerType(playerId));

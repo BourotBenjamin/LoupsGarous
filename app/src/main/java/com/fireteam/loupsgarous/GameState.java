@@ -66,7 +66,6 @@ public class GameState {
     public String getNextPlayerTurn()
     {
         Log.i("TURNS", "getNextPlayerTurn");
-        launchKillPlayer = false;
         if(currentPlayers == nbPlayers)
         {
             Log.i("TURNS", " currentPlayers == nbPlayers / type  : " + turnType);
@@ -156,32 +155,32 @@ public class GameState {
         int playerId = currentPlayers;
         Player p = new Player(playerId, participantId, displayName);
         players[playerId] = p;
-        if(currentPlayers == nbPlayers)
+        if(currentPlayers + 1 == nbPlayers)
         {
             Log.i("INIT", "INIT ALL PLAYERS TYPES ! ");
             boolean witch = false, cupidon = false, thief = false, hunter = false, seer = false;
             for(int i = 0; i < nbPlayers + 2; i++)
             {
-                if(rand.nextFloat() % 2 > 1) {
+                if(rand.nextFloat() % 2.0 >= 1) {
                     type = PlayerType.WEREWOLF;
                 }
-                else if(!witch && rand.nextFloat() % 2 > 1) {
+                else if(!witch && rand.nextFloat() % 2.0 >= 1) {
                     type = PlayerType.WITCH;
                     witch = true;
                 }
-                else if(!cupidon && rand.nextFloat() % 2 > 1) {
+                else if(!cupidon && rand.nextFloat() % 2.0 >= 1) {
                     type = PlayerType.CUPIDON;
                     cupidon = true;
                 }
-                else if(!thief && rand.nextFloat() % 2 > 1) {
+                else if(!thief && rand.nextFloat() % 2.0 >= 1) {
                     type = PlayerType.THIEF;
                     thief = true;
                 }
-                else if(!hunter && rand.nextFloat() % 2 > 1) {
+                else if(!hunter && rand.nextFloat() % 2.0 >= 1) {
                     type = PlayerType.HUNTER;
                     hunter = true;
                 }
-                else if(!seer && rand.nextFloat() % 2 > 1) {
+                else if(!seer && rand.nextFloat() % 2.0 >= 1) {
                     type = PlayerType.SEER;
                     seer = true;
                 }
@@ -398,6 +397,7 @@ public class GameState {
         }
         else
             killState = KillState.NONE_KILLED;
+        launchKillPlayer = false;
         return killState;
     }
 
@@ -431,6 +431,7 @@ public class GameState {
         players[playerIdToSetLeader].setLeader();
         Toast.makeText(mainActivity.getApplicationContext(), players[playerIdToSetLeader].getDisplayName()+  mainActivity.getResources().getString(R.string.new_leader), Toast.LENGTH_LONG).show();
         leader = playerIdToSetLeader;
+        launchSetLeader = false;
     }
 
     public String getPlayerType(int playerId)

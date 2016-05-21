@@ -7,6 +7,7 @@ import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.fireteam.loupsgarous.GameState;
@@ -31,6 +32,7 @@ public class VotingActivity extends AppCompatActivity{
 //fill the listView
         ListView alive = (ListView) findViewById(R.id.listViewPlayersAlive);
         playerNameList =  getIntent().getStringArrayListExtra("playersNames");
+        ((TextView) findViewById(R.id.title_voting)).setText(getIntent().getStringExtra("title"));
 
         ArrayAdapter<String> arrayAdapter = new ArrayAdapter<String>(this,android.R.layout.simple_list_item_1, playerNameList);
         alive.setAdapter(arrayAdapter);
