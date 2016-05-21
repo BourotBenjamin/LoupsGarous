@@ -3,14 +3,15 @@ package com.fireteam.loupsgarous;
 import android.util.Log;
 import android.widget.Toast;
 
+import com.fireteam.loupsgarous.activities.MainActivity;
 import com.fireteam.loupsgarous.player.KillState;
 import com.fireteam.loupsgarous.player.Player;
 import com.fireteam.loupsgarous.player.PlayerType;
-import com.google.android.gms.games.stats.PlayerStats;
 
 import org.json.JSONArray;
 import org.json.JSONException;
 
+import java.util.ArrayList;
 import java.util.Random;
 
 /**
@@ -64,11 +65,16 @@ public class GameState {
 
     public String getNextPlayerTurn()
     {
+        Log.i("TURNS", "getNextPlayerTurn");
         launchKillPlayer = false;
         if(currentPlayers == nbPlayers)
         {
+            Log.i("TURNS", " currentPlayers == nbPlayers / type  : " + turnType);
             switch (turnType)
             {
+                case WAITING_PLAYERS:
+                    turnType = TurnType.INIT_GAME_CUPIDON;
+                    return getNextPlayerTurn();
                 case INIT_GAME_THIEF:
                     lastPlayedIdPlayer = -1;
                     turnType = TurnType.INIT_GAME_CUPIDON;
@@ -100,7 +106,7 @@ public class GameState {
                             return players[i].getParticipantId();
                     return getNextPlayerTurn();
                 case NIGHT:
-                    while(lastPlayedIdPlayer < nbPlayers) {
+                    while(lastPlayedIdPlayer < nbPlayers - 1) {
                         ++lastPlayedIdPlayer;
                         if (players[lastPlayedIdPlayer].isAlive() && players[lastPlayedIdPlayer].getType() == PlayerType.WEREWOLF)
                             return players[lastPlayedIdPlayer].getParticipantId();
@@ -116,7 +122,7 @@ public class GameState {
                     launchKillPlayer = true;
                     return getNextPlayerTurn();
                 case DAY:
-                    while(lastPlayedIdPlayer < nbPlayers) {
+                    while(lastPlayedIdPlayer < nbPlayers - 1) {
                         ++lastPlayedIdPlayer;
                         if (players[lastPlayedIdPlayer].isAlive())
                             return players[lastPlayedIdPlayer].getParticipantId();
@@ -126,6 +132,7 @@ public class GameState {
                     return getNextPlayerTurn();
             }
         }
+        Log.i("TURNS", " Return null : " + turnType);
         return null;
     }
 
@@ -143,6 +150,7 @@ public class GameState {
 
     public int addPlayer(String participantId, String displayName)
     {
+        Log.i("INIT", "Add Player ! ");
         Random rand = new Random();
         PlayerType type;
         int playerId = currentPlayers;
@@ -150,6 +158,7 @@ public class GameState {
         players[playerId] = p;
         if(currentPlayers == nbPlayers)
         {
+            Log.i("INIT", "INIT ALL PLAYERS TYPES ! ");
             boolean witch = false, cupidon = false, thief = false, hunter = false, seer = false;
             for(int i = 0; i < nbPlayers + 2; i++)
             {
@@ -190,6 +199,7 @@ public class GameState {
             }
         }
         ++currentPlayers;
+        Log.i("INIT", "Players : " + currentPlayers);
         return playerId;
     }
 
@@ -224,12 +234,25 @@ public class GameState {
             playerSize = players[index].serialize(state, nextIndex);
             nextIndex += playerSize;
         }
+        Log.i("SERIALIZE", state.toString());
         return state.toString().getBytes();
     }
+
+    public ArrayList<String> getPlayersNames()
+    {
+        ArrayList<String> names = new ArrayList<String>();
+        for(int i = 0; i < currentPlayers; i++)
+        {
+            names.add(players[i].getDisplayName());
+        }
+        return names;
+    }
+
 
     public GameState unserialize(byte[] data) throws JSONException {
         Log.i("Serialize0", "Unserialize");
         JSONArray state = new JSONArray(new String(data));
+        Log.i("SERIALIZE", state.toString());
         nbPlayers = state.getInt(0);
         currentPlayers = state.getInt(1);
         leader = state.getInt(2);
@@ -412,7 +435,10 @@ public class GameState {
 
     public String getPlayerType(int playerId)
     {
-        return players[playerId].getTypeName();
+        if(playerId == -1)
+            return "No player selected";
+        else
+            return players[playerId].getTypeName();
     }
 
     public PlayerType[] getCardsForThief()

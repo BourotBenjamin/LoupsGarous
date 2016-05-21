@@ -16,7 +16,7 @@ public class Player {
 
     public String toString()
     {
-        return new String(" type : " + type + " Alive : " + alive + " Lover : " + loverId + " Leader : " + leader + " Name : " + participantId + "\n");
+        return new String(" type : " + type + " Alive : " + alive + " Lover : " + loverId + " Leader : " + leader + " Name : " + displayName + "\n");
     }
 
     public int getPlayerId() {

@@ -1,4 +1,4 @@
-package com.fireteam.loupsgarous;
+package com.fireteam.loupsgarous.activities;
 
 import android.content.Intent;
 import android.os.Bundle;
@@ -7,6 +7,8 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
 
+import com.fireteam.loupsgarous.GameState;
+import com.fireteam.loupsgarous.R;
 import com.fireteam.loupsgarous.player.Player;
 
 /**
@@ -14,30 +16,23 @@ import com.fireteam.loupsgarous.player.Player;
  */
 public class VotingActivityWich extends AppCompatActivity {
 
-    private GameState state;
-    private Player playertoKill;
-    public VotingActivityWich(GameState state, Player killedPlayer)
-    {
-        this.state = state;
-        playertoKill = killedPlayer;
-    }
-
+    int playerIdToKill;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_witch);
 
         TextView tv = (TextView) findViewById(R.id.playerToKill);
-        tv.setText(playertoKill.getDisplayName());
-
-
+        tv.setText( getIntent().getStringExtra("playerToKill"));
+        playerIdToKill =  getIntent().getIntExtra("playerIdToKill", -1);
 
     }
 
     public void OnYesClicked(View v)
     {
         Intent intent = new Intent();
-        intent.putExtra("playerToKill", playertoKill.getPlayerId());
+        intent.putExtra("playerToKill", playerIdToKill);
         setResult(RESULT_OK, intent);
         finish();
     }

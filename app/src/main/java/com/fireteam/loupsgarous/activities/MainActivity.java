@@ -1,4 +1,4 @@
-package com.fireteam.loupsgarous;
+package com.fireteam.loupsgarous.activities;
 
 import android.annotation.SuppressLint;
 import android.content.Intent;
@@ -14,7 +14,8 @@ import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.fireteam.loupsgarous.player.KillState;
+import com.fireteam.loupsgarous.GameState;
+import com.fireteam.loupsgarous.R;
 import com.fireteam.loupsgarous.player.Player;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
@@ -22,7 +23,6 @@ import com.google.android.gms.common.api.ResultCallback;
 import com.google.android.gms.common.api.Status;
 import com.google.android.gms.games.Games;
 import com.google.android.gms.games.multiplayer.Invitation;
-import com.google.android.gms.games.multiplayer.Multiplayer;
 import com.google.android.gms.games.multiplayer.OnInvitationReceivedListener;
 import com.google.android.gms.games.multiplayer.turnbased.OnTurnBasedMatchUpdateReceivedListener;
 import com.google.android.gms.games.multiplayer.turnbased.TurnBasedMatch;
@@ -59,7 +59,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
     private final Handler mHideHandler = new Handler();
     private View mContentView;
     private GameState state;
-    private String participantId;
+    private String googlePlayerId;
     private String displayName;
     private int playerId = -1;
     private TurnBasedMatch match;
@@ -123,6 +123,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
+        Log.i("ACTIVITY", "Create Activity");
         // Create the Google Api Client with access to the Play Games services
         mGoogleApiClient = new GoogleApiClient.Builder(this)
                 .addConnectionCallbacks(this)
@@ -165,7 +166,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
     @Override
     protected void onStop() {
         super.onStop();
-        mGoogleApiClient.disconnect();
+        //mGoogleApiClient.disconnect();
     }
 
     @Override
@@ -224,7 +225,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
 
     @Override
     public void onConnected(Bundle connectionHint) {
-        participantId = Games.Players.getCurrentPlayer(mGoogleApiClient).getPlayerId();
+        googlePlayerId = Games.Players.getCurrentPlayer(mGoogleApiClient).getPlayerId();
         displayName = Games.Players.getCurrentPlayer(mGoogleApiClient).getDisplayName();
         Intent intent = Games.TurnBasedMultiplayer.getSelectOpponentsIntent(mGoogleApiClient, NB_MIN_PLAYERS, NB_MAX_PLAYERS, true);
         startActivityForResult(intent, RC_SELECT_PLAYERS);
@@ -293,6 +294,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
 
     @Override
     protected void onActivityResult(int request, int result, Intent data) {
+        Log.e("API", "Connected : " + mGoogleApiClient.isConnected());
         switch (request) {
             case RC_SIGN_IN:
                 mSignInClicked = false;
@@ -335,7 +337,6 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
                 int position = data.getIntExtra("position", -1);
                 Toast.makeText(getApplicationContext(), getResources().getString(R.string.vote_for) + state.getPlayerName(position), Toast.LENGTH_LONG).show();
                 state.voteToSetLeader(position);
-                state.getNextPlayerTurn();
                 takeTurn();
                 break;
             case PLAYER_VOTE_TO_KILL:
@@ -345,7 +346,6 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
                 int playerToKill = data.getIntExtra("position", -1);
                 Toast.makeText(getApplicationContext(), getResources().getString(R.string.vote_against) + state.getPlayerName(playerToKill), Toast.LENGTH_LONG).show();
                 state.voteToKillPlayer(playerToKill);
-                state.getNextPlayerTurn();
                 takeTurn();
                 break;
             case PLAYER_VOTE_TO_SAVE:
@@ -361,7 +361,6 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
                 {
                     Toast.makeText(getApplicationContext(), getResources().getString(R.string.let_kill) + state.getPlayerName(playerToSave), Toast.LENGTH_LONG).show();
                 }
-                state.getNextPlayerTurn();
                 takeTurn();
                 break;
             case PLAYER_VOTE_TO_LOVE:
@@ -371,7 +370,6 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
                 int firstLover = data.getIntExtra("firstLover", -1);
                 int secondLover = data.getIntExtra("secondLover", -1);
                 state.setLovers(firstLover, secondLover);
-                state.getNextPlayerTurn();
                 takeTurn();
                 break;
             case PLAYER_VOTE_TO_SEE:
@@ -391,11 +389,11 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
     public void initGame()
     {
         state.init(CURRENT_PLAYERS);
-        playerId = state.addPlayer(participantId, displayName);
+        playerId = state.addPlayer(match.getParticipantId(googlePlayerId), displayName);
         try{
 
             byte [] serializedData = state.serialize();
-            Games.TurnBasedMultiplayer.takeTurn(mGoogleApiClient, match.getMatchId(), serializedData, null).setResultCallback(
+            Games.TurnBasedMultiplayer.takeTurn(mGoogleApiClient, match.getMatchId(), serializedData, state.getNextPlayerTurn()).setResultCallback(
                     new ResultCallback<TurnBasedMultiplayer.UpdateMatchResult>() {
                         @Override
                         public void onResult(TurnBasedMultiplayer.UpdateMatchResult result) {
@@ -414,38 +412,44 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
 
         // TODO Actions !!
         /** DO ACTIONS HERE **/
-
+        Log.i("TURNS", "Play game - Turn type : " +  state.getTurnType());
         if(state.getTurnType() == null)
         {
             if(playerId == -1)
-                playerId = state.addPlayer(participantId, displayName);
+                playerId = state.addPlayer(match.getParticipantId(googlePlayerId), displayName);
             takeTurn();
         }
         else
             switch (state.getTurnType()) {
                 case WAITING_PLAYERS:
                     if(playerId == -1)
-                        playerId = state.addPlayer(participantId, displayName);
+                        playerId = state.addPlayer(match.getParticipantId(googlePlayerId), displayName);
                     takeTurn();
                     break;
                 case NIGHT:
-                    Intent voteIntent = new Intent(new VotingActivity(state), null);
+                    Intent voteIntent = new Intent(this, VotingActivity.class);
+                    voteIntent.putExtra("playersNames", state.getPlayersNames());
                     startActivityForResult(voteIntent, PLAYER_VOTE_TO_KILL);
                     break;
                 case DAY:
-                    Intent voteIntentDay = new Intent(new VotingActivity(state), null);
+                    Intent voteIntentDay = new Intent(this, VotingActivity.class);
+                    voteIntentDay.putExtra("playersNames", state.getPlayersNames());
                     startActivityForResult(voteIntentDay, PLAYER_VOTE_TO_KILL);
                     break;
                 case WITCH_TURN:
-                    Intent voteForSaving = new Intent(new VotingActivityWich(state, state.getPlayerToKill()), null);
+                    Intent voteForSaving = new Intent(this, VotingActivityWich.class);
+                    voteForSaving.putExtra("playerToKill", state.getPlayerToKill().getDisplayName());
+                    voteForSaving.putExtra("playerIdToKill", state.getPlayerToKill().getPlayerId());
                     startActivityForResult(voteForSaving, PLAYER_VOTE_TO_SAVE);
                     break;
                 case SEER_TURN:
-                    Intent voteForSeeing = new Intent(new VotingActivity(state), null);
+                    Intent voteForSeeing = new Intent(this, VotingActivity.class);
+                    voteForSeeing.putExtra("playersNames", state.getPlayersNames());
                     startActivityForResult(voteForSeeing, PLAYER_VOTE_TO_SEE);
                     break;
                 case VOTE_FOR_LEADER:
-                    Intent voteForLeader = new Intent(new VotingActivity(state), null);
+                    Intent voteForLeader = new Intent(this, VotingActivity.class);
+                    voteForLeader.putExtra("playersNames", state.getPlayersNames());
                     startActivityForResult(voteForLeader, PLAYER_VOTE_TO_ELECT);
                     break;
                 /*case INIT_GAME_THIEF:
@@ -453,7 +457,8 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
                     startActivityForResult(voteForLeader, PLAYER_VOTE_TO_ELECT);
                     break;*/
                 case INIT_GAME_CUPIDON:
-                    Intent voteForLovers = new Intent(new SelectLovers(state), null);
+                    Intent voteForLovers = new Intent(this, SelectLovers.class);
+                    voteForLovers.putExtra("playersNames", state.getPlayersNames());
                     startActivityForResult(voteForLovers, PLAYER_VOTE_TO_LOVE);
                     break;
 
@@ -465,15 +470,24 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
     public void takeTurn()
     {
         try {
-            byte[] serializedData = state.serialize();
             String nextPlayerToPlay = state.getNextPlayerTurn();
-            Games.TurnBasedMultiplayer.takeTurn(mGoogleApiClient, match.getMatchId(), serializedData, nextPlayerToPlay).setResultCallback(
-                    new ResultCallback<TurnBasedMultiplayer.UpdateMatchResult>() {
-                        @Override
-                        public void onResult(TurnBasedMultiplayer.UpdateMatchResult result) {
-                            processResult(result);
-                        }
-                    });
+            if(nextPlayerToPlay != null && nextPlayerToPlay.length() > 5 )
+                nextPlayerToPlay = match.getParticipantId(nextPlayerToPlay);
+            if(nextPlayerToPlay == match.getParticipantId(googlePlayerId))
+                playOrUpdateTurn(match);
+            else {
+                byte[] serializedData = state.serialize();
+                Log.i("TURNS", "Next player : " + nextPlayerToPlay + " - " + match.getMatchId());
+                if(!mGoogleApiClient.isConnected())
+                    Log.e("API", "API Not connected !!");
+                Games.TurnBasedMultiplayer.takeTurn(mGoogleApiClient, match.getMatchId(), serializedData, nextPlayerToPlay).setResultCallback(
+                        new ResultCallback<TurnBasedMultiplayer.UpdateMatchResult>() {
+                            @Override
+                            public void onResult(TurnBasedMultiplayer.UpdateMatchResult result) {
+                                processResult(result);
+                            }
+                        });
+            }
         }
         catch(JSONException e)
         {
@@ -513,35 +527,59 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
     {
         //TODO Update turn
         /** SHOW WHAT HAPPENS LAST TURN HERE **/
-        ListView alive = (ListView) findViewById(R.id.listViewPlayersAlive);
-        ListView died = (ListView) findViewById(R.id.listViewPlayersDied);
-        ArrayList<String> playerAliveList = new ArrayList<String>();
-        ArrayList<String> playerDeadList = new ArrayList<String>();
-        for(Player p : state.getPlayers())
-        {
-            if(p != null) {
-                if (p.isAlive()) {
-                    playerAliveList.add(p.getDisplayName());
-                } else {
-                    playerDeadList.add(p.getDisplayName() + " : " + p.getTypeName());
+        if(playerId != -1) {
+            ListView alive = (ListView) findViewById(R.id.listViewPlayersAlive);
+            ListView died = (ListView) findViewById(R.id.listViewPlayersDied);
+            ArrayList<String> playerAliveList = new ArrayList<String>();
+            ArrayList<String> playerDeadList = new ArrayList<String>();
+            for (Player p : state.getPlayers()) {
+                if (p != null) {
+                    if (p.isAlive()) {
+                        playerAliveList.add(p.getDisplayName());
+                    } else {
+                        playerDeadList.add(p.getDisplayName() + " : " + p.getTypeName());
+                    }
                 }
             }
+            ArrayAdapter<String> arrayAdapter = new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, playerAliveList);
+            alive.setAdapter(arrayAdapter);
+            ArrayAdapter<String> arrayAdapter2 = new ArrayAdapter<String>(this, android.R.layout.simple_list_item_2, playerDeadList);
+            died.setAdapter(arrayAdapter2);
+            TextView myClass = (TextView) findViewById(R.id.myOwnClass);
+            myClass.setText(state.getPlayerType(playerId));
+            TextView isAlive = (TextView) findViewById(R.id.amIAlive);
+            if (state.isPlayerAlive(playerId))
+                isAlive.setText(getResources().getString(R.string.alive));
+            else
+                isAlive.setText(getResources().getString(R.string.dead));
         }
-        ArrayAdapter<String> arrayAdapter = new ArrayAdapter<String>(this,android.R.layout.simple_list_item_1, playerAliveList);
-        alive.setAdapter(arrayAdapter);
-        ArrayAdapter<String> arrayAdapter2 = new ArrayAdapter<String>(this,android.R.layout.simple_list_item_2, playerDeadList);
-        died.setAdapter(arrayAdapter2);
-        TextView myClass = (TextView) findViewById(R.id.myOwnClass);
-        myClass.setText(state.getPlayerType(playerId));
-        TextView isAlive = (TextView) findViewById(R.id.amIAlive);
-        if(state.isPlayerAlive(playerId))
-            isAlive.setText(getResources().getString(R.string.alive));
-        else
-            isAlive.setText(getResources().getString(R.string.dead));
-
         /** END SHOW WHAT HAPPENS LAST TURN HERE **/
     }
 
+    public void playOrUpdateTurn(TurnBasedMatch match)
+    {
+        this.match = match;
+        try {
+            state.unserialize(match.getData());
+        }
+        catch(JSONException e){
+            Log.e("Serialize", "ERROR");
+            e.printStackTrace();
+        }
+        boolean isDoingTurn = (match.getTurnStatus() == TurnBasedMatch.MATCH_TURN_STATUS_MY_TURN);
+        if (isDoingTurn) {
+            Log.i("TURNS", "My turn");
+            playGame();
+            updateGame();
+            return;
+        }
+        else
+        {
+            Log.i("TURNS", "Someone else turn");
+            updateGame();
+            return;
+        }
+    }
 
     public void processResult(TurnBasedMultiplayer.UpdateMatchResult result) {
 
@@ -550,52 +588,12 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
             //showError(status.getStatusCode());
             return;
         }
-        this.match = result.getMatch();
-
-
-        try {
-            state.unserialize(match.getData());
-        }
-        catch(JSONException e){
-            Log.e("Serialize", "ERROR");
-            e.printStackTrace();
-        }
-
-        Log.i("Serialize2", state.toString());
-        /*
-        if (match.canRematch()) {
-            askForRematch();
-        }*/
-        boolean isDoingTurn = (match.getTurnStatus() == TurnBasedMatch.MATCH_TURN_STATUS_MY_TURN);
-
-        if (isDoingTurn) {
-            Toast.makeText(getApplicationContext(), "I PLAY", Toast.LENGTH_LONG).show();
-            playGame();
-            updateGame();
-            return;
-        }
-        else
-        {
-            Toast.makeText(getApplicationContext(), "PLAYER " + match.getPendingParticipantId() , Toast.LENGTH_LONG).show();
-            updateGame();
-            return;
-        }
+        playOrUpdateTurn(result.getMatch());
     }
 
     @Override
     public void onTurnBasedMatchReceived(TurnBasedMatch turnBasedMatch) {
-        this.match = turnBasedMatch;
-        Log.i("TURN", "SOMEONE PLAYED");
-        Toast.makeText(getApplicationContext(), "SOMEONE PLAYED " + match.getPendingParticipantId() , Toast.LENGTH_LONG).show();
-        try {
-            state.unserialize(match.getData());
-        }
-        catch(JSONException e){
-            Log.e("Serialize", "ERROR");
-            e.printStackTrace();
-        }
-        updateGame();
-
+        playOrUpdateTurn(turnBasedMatch);
     }
 
     @Override

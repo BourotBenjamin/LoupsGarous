@@ -1,4 +1,4 @@
-package com.fireteam.loupsgarous;
+package com.fireteam.loupsgarous.activities;
 
 import android.content.Intent;
 import android.os.Bundle;
@@ -7,58 +7,63 @@ import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
+import android.widget.TextView;
 import android.widget.Toast;
 
+import com.fireteam.loupsgarous.GameState;
+import com.fireteam.loupsgarous.R;
 import com.fireteam.loupsgarous.player.Player;
-import com.google.android.gms.common.api.GoogleApiClient;
-
-import org.json.JSONException;
 
 import java.util.ArrayList;
 
 /**
- * Created by gregoire on 19/05/2016.
+ * Created by gregoire on 20/05/2016.
  */
-public class VotingActivity extends AppCompatActivity{
+public class SelectLovers extends AppCompatActivity {
 
-    private GameState state;
-    public VotingActivity(GameState state)
-    {
-        this.state = state;
-    }
-
+    private int selected = 0;
+    private int firstLover;
+    private int secondLover;
     ArrayList<String> playerNameList;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_voting);
+        setContentView(R.layout.activity_cupidon);
+
 //fill the listView
         ListView alive = (ListView) findViewById(R.id.listViewPlayersAlive);
-        playerNameList = new ArrayList<String>();
-        for(Player p : state.getPlayers())
-        {
-            playerNameList.add(p.getDisplayName());
-        }
-
+        playerNameList = getIntent().getStringArrayListExtra("playersNames");
         ArrayAdapter<String> arrayAdapter = new ArrayAdapter<String>(this,android.R.layout.simple_list_item_1, playerNameList);
         alive.setAdapter(arrayAdapter);
-
-
         alive.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             // argument position gives the index of item which is clicked
             public void onItemClick(AdapterView<?> arg0, View v, int position, long arg3) {
-
-                if(state.getPlayers()[position].isAlive()) {
+                if(selected == 0)
+                {
+                    firstLover = position;
+                    ++selected;
+                }
+                else if(selected == 1)
+                {
+                    if(position != firstLover)
+                    {
+                        secondLover = position;
+                        ++selected;
+                    }
+                    else
+                        Toast.makeText(getApplicationContext(), "Ce joueur est déjà selectionné ", Toast.LENGTH_LONG).show();
+                }
+                if(selected == 2)
+                {
                     Intent intent = new Intent();
-                    intent.putExtra("position", position);
+                    intent.putExtra("firstLover",firstLover);
+                    intent.putExtra("secondLover",secondLover);
                     setResult(RESULT_OK, intent);
                     finish();
                 }
-                else
-                {
-                    Toast.makeText(getApplicationContext(), "Ce joueur est déjà mort! ", Toast.LENGTH_LONG).show();
-                }
             }
         });
+
+
     }
 }
