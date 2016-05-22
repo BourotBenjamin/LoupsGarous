@@ -10,6 +10,7 @@ import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
 import android.widget.ArrayAdapter;
+import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -576,8 +577,11 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
             alive.setAdapter(arrayAdapter);
             ArrayAdapter<String> arrayAdapter2 = new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, playerDeadList);
             died.setAdapter(arrayAdapter2);
-            TextView myClass = (TextView) findViewById(R.id.myOwnClass);
-            myClass.setText(state.getPlayerType(playerId));
+            int myClassId = state.getPlayerTypeImage(playerId);
+            if(myClassId != 0) {
+                ImageView myClass = (ImageView) findViewById(R.id.myOwnClass);
+                myClass.setImageResource(state.getPlayerTypeImage(playerId));
+            }
             TextView isAlive = (TextView) findViewById(R.id.amIAlive);
             if (state.isPlayerAlive(playerId))
                 isAlive.setText(getResources().getString(R.string.alive));

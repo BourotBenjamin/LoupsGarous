@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:orientation="vertical"
-    android:layout_width="wrap_content"
+    android:layout_width="fill_parent"
     android:layout_height="wrap_content"
     android:background="@drawable/rect_round_corner"
     android:layout_centerInParent="true">
@@ -20,7 +20,7 @@
 
 
 
-    <TextView
+    <ImageView
         android:id="@+id/myOwnClass"
         android:layout_height="300dp"
         android:layout_width="match_parent"

@@ -1,5 +1,7 @@
 package com.fireteam.loupsgarous.player;
 
+import com.fireteam.loupsgarous.R;
+
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -59,6 +61,29 @@ public class Player {
                     return "Sorcier";
             }
         return "";
+    }
+
+    public int getTypeImageId()
+    {
+        if(type != null)
+            switch (type)
+            {
+                case CUPIDON:
+                    return R.mipmap.carte_cupidon;
+                case HUNTER:
+                    return R.mipmap.carte_villageois;
+                case SEER:
+                    return R.mipmap.carte_voyante;
+                case THIEF:
+                    return R.mipmap.carte_villageois;
+                case VILLAGER:
+                    return R.mipmap.carte_villageois;
+                case WEREWOLF:
+                    return R.mipmap.carte_loup;
+                case WITCH:
+                    return R.mipmap.carte_sorciere;
+            }
+        return 0;
     }
 
     public void setLeader() {

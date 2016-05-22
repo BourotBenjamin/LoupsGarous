@@ -444,6 +444,14 @@ public class GameState {
             return players[playerId].getTypeName();
     }
 
+    public int getPlayerTypeImage(int playerId)
+    {
+        if(playerId == -1)
+            return 0;
+        else
+            return players[playerId].getTypeImageId();
+    }
+
     public PlayerType[] getCardsForThief()
     {
         return middleCards;
