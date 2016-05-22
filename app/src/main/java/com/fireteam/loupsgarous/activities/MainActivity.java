@@ -336,7 +336,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
                     return;
                 }
                 int position = data.getIntExtra("position", -1);
-                Toast.makeText(getApplicationContext(), getResources().getString(R.string.vote_for) + state.getPlayerName(position), Toast.LENGTH_LONG).show();
+                Toast.makeText(getApplicationContext(), getResources().getString(R.string.vote_for) + " " + state.getPlayerName(position), Toast.LENGTH_LONG).show();
                 state.voteToSetLeader(position);
                 takeTurn();
                 break;
@@ -345,7 +345,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
                     return;
                 }
                 int playerToKill = data.getIntExtra("position", -1);
-                Toast.makeText(getApplicationContext(), getResources().getString(R.string.vote_against) + state.getPlayerName(playerToKill), Toast.LENGTH_LONG).show();
+                Toast.makeText(getApplicationContext(), getResources().getString(R.string.vote_against) + " " + state.getPlayerName(playerToKill), Toast.LENGTH_LONG).show();
                 state.voteToKillPlayer(playerToKill);
                 takeTurn();
                 break;
@@ -360,7 +360,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
                 }
                 else
                 {
-                    Toast.makeText(getApplicationContext(), getResources().getString(R.string.let_kill) + state.getPlayerName(playerToSave), Toast.LENGTH_LONG).show();
+                    Toast.makeText(getApplicationContext(), getResources().getString(R.string.let_kill) + " " + state.getPlayerName(playerToSave), Toast.LENGTH_LONG).show();
                 }
                 takeTurn();
                 break;
@@ -378,7 +378,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
                     return;
                 }
                 int positionToSee = data.getIntExtra("position", -1);
-                Toast.makeText(getApplicationContext(),  getResources().getString(R.string.player_is) + state.getPlayerType(positionToSee), Toast.LENGTH_LONG).show();
+                Toast.makeText(getApplicationContext(),  getResources().getString(R.string.player_is) + " " + state.getPlayerType(positionToSee), Toast.LENGTH_LONG).show();
                 takeTurn();
                 break;
 
@@ -404,6 +404,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
         }
         catch(JSONException e)
         {
+            Log.e("SERIALIZE", "Error");
             e.printStackTrace();
         }
 
@@ -496,6 +497,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
         }
         catch(JSONException e)
         {
+            Log.e("SERIALIZE", "Error");
             e.printStackTrace();
         }
     }
@@ -538,11 +540,11 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
         // If this player is not the first player in this match, continue.
         if (match.getData() != null) {
             try {
+                Log.i("Serialize", "Unserialize V1");
                 state.unserialize(match.getData());
             }
             catch(JSONException e){
-                Log.e("Serialize", "ERROR");
-                e.printStackTrace();
+                initGame();
             }
            Log.i("Serialize", state.toString());
             playGame();
@@ -590,6 +592,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
         this.match = match;
         if(unserialize) {
             try {
+                Log.i("Serialize", "Unserialize V1");
                 state.unserialize(match.getData());
             } catch (JSONException e) {
                 Log.e("Serialize", "ERROR");
@@ -618,11 +621,13 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
             //showError(status.getStatusCode());
             return;
         }
+        Log.i("Serialize", "Process");
         playOrUpdateTurn(result.getMatch(), true);
     }
 
     @Override
     public void onTurnBasedMatchReceived(TurnBasedMatch turnBasedMatch) {
+        Log.i("Serialize", "OnTurn");
         playOrUpdateTurn(turnBasedMatch, true);
     }
 

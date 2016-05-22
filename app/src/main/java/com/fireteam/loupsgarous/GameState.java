@@ -31,10 +31,12 @@ public class GameState {
     private MainActivity mainActivity;
     private boolean launchKillPlayer;
     private boolean launchSetLeader;
+    private String currentTurnActions;
 
     public GameState(MainActivity mainActivity)
     {
         this.mainActivity = mainActivity;
+        currentTurnActions = "";
     }
 
     public String getPlayerName(int playerId)
@@ -72,6 +74,7 @@ public class GameState {
         }
         lastPlayedIdPlayer = -1;
         turnType = nextType;
+        Log.i("TURNS", " Return null : " + turnType);
         if(!killPlayer)
             return getNextPlayerTurn();
         launchKillPlayer = true;
@@ -103,7 +106,7 @@ public class GameState {
                     }
                     break;
                 case SEER_TURN:
-                    return getNextPlayerByType(PlayerType.SEER, TurnType.NIGHT, true);
+                    return getNextPlayerByType(PlayerType.SEER, TurnType.NIGHT, false);
                 case NIGHT:
                     return getNextPlayerByType(PlayerType.WEREWOLF, TurnType.WITCH_TURN, false);
                 case WITCH_TURN:
@@ -210,12 +213,13 @@ public class GameState {
         state.put(6, lastPlayedIdPlayer);
         state.put(7, launchKillPlayer);
         state.put(8, launchSetLeader);
+        state.put(9, currentTurnActions);
         int index;
         for(index = 0; index < nbPlayers; index++)
         {
-            state.put(index + 9, votes[index]);
+            state.put(index + 10, votes[index]);
         }
-        int nextIndex = nbPlayers + 9, playerSize = 0;
+        int nextIndex = nbPlayers + 10, playerSize = 0;
         for(index = 0; index < currentPlayers; index++)
         {
             playerSize = players[index].serialize(state, nextIndex);
@@ -239,7 +243,7 @@ public class GameState {
     public GameState unserialize(byte[] data) throws JSONException {
         Log.i("Serialize0", "Unserialize");
         JSONArray state = new JSONArray(new String(data));
-        Log.i("SERIALIZE", state.toString());
+        Log.i("UNSERIALIZE", state.toString());
         nbPlayers = state.getInt(0);
         currentPlayers = state.getInt(1);
         leader = state.getInt(2);
@@ -258,13 +262,17 @@ public class GameState {
         lastPlayedIdPlayer = state.getInt(6);
         launchKillPlayer = state.getBoolean(7);
         launchSetLeader = state.getBoolean(8);
+        currentTurnActions = state.getString(9);
+        if(!currentTurnActions.isEmpty())
+            Toast.makeText(mainActivity.getApplicationContext(), currentTurnActions, Toast.LENGTH_LONG).show();
+        currentTurnActions = "";
         int index;
         for(index = 0; index < nbPlayers; index++)
         {
-            votes[index] = state.getInt(index + 9);
+            votes[index] = state.getInt(index + 10);
         }
         Log.i("Serialize0", "Unserialize players");
-        int nextIndex = nbPlayers + 9, playerSize = 0;
+        int nextIndex = nbPlayers + 10, playerSize = 0;
         for(index = 0; index < currentPlayers; index++)
         {
             if(players[index] == null) {
@@ -358,11 +366,9 @@ public class GameState {
             playerToKill = players[playerIdToKill];
         if(playerToKill != null && playerToKill.isAlive()) {
             playerToKill.kill();
-            Toast.makeText(mainActivity.getApplicationContext(), playerToKill.getDisplayName()+ mainActivity.getResources().getString(R.string.died) + playerToKill.getTypeName(), Toast.LENGTH_LONG).show();
-            Log.i("GAME", playerToKill.getDisplayName()+ mainActivity.getResources().getString(R.string.died) + playerToKill.getTypeName());
+            currentTurnActions += playerToKill.getDisplayName()+ " " +  mainActivity.getResources().getString(R.string.died) + " " + playerToKill.getTypeName() + ". " ;
             if (playerToKill.getLoverId() != -1) {
-                Toast.makeText(mainActivity.getApplicationContext(), mainActivity.getResources().getString(R.string.lover) + players[playerToKill.getLoverId()].getDisplayName()+ mainActivity.getResources().getString(R.string.was) + playerToKill.getTypeName(), Toast.LENGTH_LONG).show();
-                Log.i("GAME", mainActivity.getResources().getString(R.string.lover) + players[playerToKill.getLoverId()].getDisplayName()+ mainActivity.getResources().getString(R.string.was) + playerToKill.getTypeName());
+                currentTurnActions += mainActivity.getResources().getString(R.string.lover) + " " + players[playerToKill.getLoverId()].getDisplayName() + " " + mainActivity.getResources().getString(R.string.was) + " " + playerToKill.getTypeName();
                 players[playerToKill.getLoverId()].kill();
                 if(playerToKill.getType() == PlayerType.HUNTER) {
                     if (players[playerToKill.getLoverId()].isLeader() || playerToKill.isLeader())
@@ -425,7 +431,7 @@ public class GameState {
         if(playerIdToSetLeader == - 1)
             playerIdToSetLeader = getPlayerIdToSetLeader();
         players[playerIdToSetLeader].setLeader();
-        Toast.makeText(mainActivity.getApplicationContext(), players[playerIdToSetLeader].getDisplayName()+  mainActivity.getResources().getString(R.string.new_leader), Toast.LENGTH_LONG).show();
+        currentTurnActions += players[playerIdToSetLeader].getDisplayName() + " " +  mainActivity.getResources().getString(R.string.new_leader);
         leader = playerIdToSetLeader;
         launchSetLeader = false;
     }
