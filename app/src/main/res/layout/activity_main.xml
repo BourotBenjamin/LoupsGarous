@@ -6,6 +6,10 @@
     android:background="@drawable/rect_round_corner"
     android:layout_centerInParent="true">
 
+    <!-- Les textes dans les strings.xml ^^
+        Et les balises right ou left doivent être accompagné de
+        start et end pour supporter le nouveau format.
+        Ici il vous manque paddingStart="90dp" paddingEnd="80dp" -->
     <TextView
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
@@ -42,7 +46,7 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:background="@drawable/rect_round_corner"
-        android:layout_centerInParent="true">
+        android:layout_centerInParent="true"> <!-- Center in parent ne sert à rien dans un LinearLayout -->
 
         <TextView
             android:layout_width="100dp"
@@ -72,6 +76,9 @@
         android:orientation="horizontal"
         android:background="#dea62d">
 
+        <!-- Votre deuxième liste dépasse de l'écran. Il aurait fallu utiliser les poids
+        layoutWeight="1" layout_width="0dp" sur chaque liste et elles prendraient chacune la moitié
+        de l'écran -->
         <ListView
             android:id="@+id/listViewPlayersDied"
             android:layout_width="180dp"

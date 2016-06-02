@@ -6,12 +6,12 @@
     android:background="#dea62d"
     android:layout_centerInParent="true">
 
+    <!-- Comme pour cupidon, juste la TextView -->
     <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
         android:orientation="vertical"
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
-        android:background="@drawable/rect_round_corner"
-        android:layout_centerInParent="true">
+        android:background="@drawable/rect_round_corner">
 
         <TextView
             android:id="@+id/title_voting"

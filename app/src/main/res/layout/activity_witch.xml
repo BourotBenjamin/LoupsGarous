@@ -35,6 +35,8 @@
 
     </LinearLayout>
 
+    <!-- Attention aux OnClick, mieux vaut avoir un android:id et faire la liaison manuellement -->
+    <!-- Left doit être accompagné de Start et les textes en sp -->
     <CheckBox
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"

@@ -152,7 +152,7 @@ public class GameState {
             boolean witch = false, cupidon = false, thief = false, hunter = false, seer = false;
             for(int i = 0; i < nbPlayers + 2; i++)
             {
-                if(rand.nextInt() % 2 > 0) {
+                if(rand.nextInt() % 2 > 0) { // Outch vous avez la possibilité d'avoir bcp de loup garous :P
                     type = PlayerType.WEREWOLF;
                 }
                 else if(!witch && rand.nextInt() % 2 > 0) {
@@ -366,7 +366,10 @@ public class GameState {
             playerToKill = players[playerIdToKill];
         if(playerToKill != null && playerToKill.isAlive()) {
             playerToKill.kill();
+            // Oui
             currentTurnActions += playerToKill.getDisplayName()+ " " +  mainActivity.getResources().getString(R.string.died) + " " + playerToKill.getTypeName() + ". " ;
+            // Il est possible d'ecrire des string avec des parametres. En voici un example
+            // currentTurnActions += mainActivity.getResources().getString(R.string.diedExample, playerToKill.getDisplayName(), playerToKill.getTypeName());
             if (playerToKill.getLoverId() != -1) {
                 currentTurnActions += mainActivity.getResources().getString(R.string.lover) + " " + players[playerToKill.getLoverId()].getDisplayName() + " " + mainActivity.getResources().getString(R.string.was) + " " + playerToKill.getTypeName();
                 players[playerToKill.getLoverId()].kill();
@@ -439,7 +442,7 @@ public class GameState {
     public String getPlayerType(int playerId)
     {
         if(playerId == -1)
-            return "No player selected";
+            return "No player selected"; // Hard coded value :P
         else
             return players[playerId].getTypeName();
     }
