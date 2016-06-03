@@ -32,9 +32,10 @@ public class SelectLovers extends AppCompatActivity {
 
 //fill the listView
         ListView alive = (ListView) findViewById(R.id.listViewPlayersAlive);
-        playerNameList = getIntent().getStringArrayListExtra("playersNames");
+        playerNameList = getIntent().getStringArrayListExtra("playersNames"); // Pour être sur en cas de changement il vaut mieux utiliser des constantes.
+        // playerNameList = getIntent().getStringArrayListExtra(PLAYER_NAMES_KEY);
         ArrayAdapter<String> arrayAdapter = new ArrayAdapter<String>(this,android.R.layout.simple_list_item_1, playerNameList);
-        alive.setAdapter(arrayAdapter);
+        alive.setAdapter(arrayAdapter); // Attention alive peut être null. La méthode findViewById peut renvoyer null s'il ne trouve pas le composant dans le layout
         alive.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             // argument position gives the index of item which is clicked
             public void onItemClick(AdapterView<?> arg0, View v, int position, long arg3) {
@@ -51,19 +52,19 @@ public class SelectLovers extends AppCompatActivity {
                         ++selected;
                     }
                     else
-                        Toast.makeText(getApplicationContext(), "Ce joueur est déjà selectionné ", Toast.LENGTH_LONG).show();
+                        Toast.makeText(getApplicationContext(), "Ce joueur est déjà selectionné ", Toast.LENGTH_LONG).show(); // Attention à l'extraction de toutes les strings dans le fichier xml.
                 }
                 if(selected == 2)
                 {
                     Intent intent = new Intent();
-                    intent.putExtra("firstLover",firstLover);
+                    intent.putExtra("firstLover",firstLover); // Pareil que pour playerNames
                     intent.putExtra("secondLover",secondLover);
                     setResult(RESULT_OK, intent);
                     finish();
                 }
             }
         });
-
+        // Oui bonne implémentation du setActivityForResult et du listener sur les dans une liste.
 
     }
 }

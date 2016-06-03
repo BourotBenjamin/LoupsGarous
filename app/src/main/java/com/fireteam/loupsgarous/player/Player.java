@@ -40,6 +40,8 @@ public class Player {
         this.loverId = -1;
     }
 
+    // Oui mais vous auriez pu mettre cette fonction dans l'enum
+    // et faire CUPIDON.toName(); par exemple
     public String getTypeName()
     {
         if(type != null)
@@ -63,13 +65,14 @@ public class Player {
         return "";
     }
 
+    // De même que pour au dessus.
     public int getTypeImageId()
     {
         if(type != null)
             switch (type)
             {
                 case CUPIDON:
-                    return R.mipmap.carte_cupidon;
+                    return R.mipmap.carte_cupidon; // Attention mipmap c'est uniquement pour les icones. S'il s'agit d'une image, elles doivent être dans les dossiers drawable
                 case HUNTER:
                     return R.mipmap.carte_villageois;
                 case SEER:

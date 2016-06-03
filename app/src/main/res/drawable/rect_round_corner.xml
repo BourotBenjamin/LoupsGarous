@@ -5,7 +5,7 @@
 
     <!-- view background color -->
     <solid
-        android:color="#9b4841" >
+        android:color="#9b4841" > <!-- Oui mais vous auriez pu utiliser le fichier colors.xml pour tout centraliser -->
     </solid>
 
     <!-- view border color and width -->

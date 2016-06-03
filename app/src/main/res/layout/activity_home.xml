@@ -19,6 +19,8 @@
         android:textSize="50sp"
         android:textStyle="bold" />
 
+    <!-- Pas de px pour les tailles, sinon c'est fixe quel que soit la taille du téléphone.
+     La par exemple c'est petit sur un Nexus 5 et ça ne rentre pas sur un Wiko -->
     <ImageView
         android:layout_height="615px"
         android:layout_width="608px"
